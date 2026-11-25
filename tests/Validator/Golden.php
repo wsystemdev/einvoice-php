@@ -31,6 +31,25 @@ final class Golden
             + ($full ? [3 => $i['rule_id'] === 'XSD' ? '' : (string) $i['location'], 4 => (string) $i['message']] : [])), array_values($entries));
     }
 
+    /** Assert a PHP result equals the golden Python-engine result for one corpus case (verdict, entries, detection). */
+    public static function assertSameAsGolden(\PHPUnit\Framework\TestCase $t, array $c, array $r): void
+    {
+        $t->assertNull($c['input_error'], 'reference raised: ' . (string) $c['input_error']);
+        $t->assertSame($c['valid'], $r['valid']);
+        $t->assertSame(self::sig($c['errors']), self::sig($r['errors']));
+        $t->assertSame(self::sig($c['warnings']), self::sig($r['warnings']));
+        foreach (['syntax', 'document_type', 'customization_id', 'profile', 'container', 'notes'] as $k) {
+            $t->assertSame($c[$k], $r[$k], $k);
+        }
+        $t->assertSame($c['embedded_file'] ?? null, $r['embedded_file'] ?? null);
+        foreach ($c['errors'] as $i => $e) {
+            $t->assertSame($e['business_terms'], $r['errors'][$i]['business_terms'], $e['rule_id']);
+            if ($e['rule_id'] === 'XSD') {
+                $t->assertSame($e['message'], $r['errors'][$i]['message']);
+            }
+        }
+    }
+
     public static function saxonOrSkip(\PHPUnit\Framework\TestCase $t): void
     {
         if (!\WSystem\EInvoice\Validator\Backend\SaxonCBackend::available()) {
