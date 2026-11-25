@@ -21,8 +21,10 @@ final class CliTest extends TestCase
         $this->assertSame(0, $code);
         $this->assertSame('', $err);
         $this->assertStringContainsString('wsystem-einvoice create', $out);
+        $this->assertStringContainsString('php-core', $out);
         $this->assertStringContainsString('pre-check', $out);
-        $this->assertStringContainsString('SaxonC', $out);
+        $this->assertStringContainsString('saxonc', $out);
+        $this->assertStringContainsString('ext-saxonc', $out);
     }
 
     public function testUnknownCommandIsUsage(): void
@@ -69,6 +71,11 @@ final class CliTest extends TestCase
             $meta = json_decode($out, true);
             $this->assertSame('zugferd', $meta['format']);
             $this->assertSame('955.00', $meta['totals']['line_total']);
+            $this->assertContains($meta['engine'], ['php-core', 'saxonc']);
+            if ($meta['engine'] === 'php-core') {
+                $this->assertSame('pre-check', $meta['conformance']);
+                $this->assertTrue($meta['valid']);
+            }
             $this->assertArrayNotHasKey('pdf', $meta);
             $this->assertStringStartsWith('%PDF-1.7', file_get_contents($outFile));
         } finally {
@@ -115,18 +122,64 @@ final class CliTest extends TestCase
         $this->assertStringContainsString('input error: issue_date must be YYYY-MM-DD', $err);
     }
 
-    public function testValidateAndParseAnnounceMissingModule(): void
+    public function testValidateAndParseAGeneratedInvoice(): void
     {
-        if (class_exists(\WSystem\EInvoice\Validator\Validator::class)) {
-            $this->markTestSkipped('validator module is present');
-        }
-        [$code, , $err] = self::runCli(['wsystem-einvoice', 'validate', '-'], '<Invoice/>');
-        $this->assertSame(2, $code);
-        $this->assertStringContainsString('validator module, which is not in this build yet', $err);
+        $in = __DIR__ . '/../examples/invoice.json';
+        $xmlFile = sys_get_temp_dir() . '/ws-cli-' . bin2hex(random_bytes(4)) . '.xml';
+        try {
+            [$code, , $err] = self::runCli(['wsystem-einvoice', 'create', $in, $xmlFile]);
+            $this->assertSame(0, $code, $err);
+            $xml = file_get_contents($xmlFile);
 
-        [$code, , $err] = self::runCli(['wsystem-einvoice', 'parse', '-'], '<Invoice/>');
-        $this->assertSame(2, $code);
-        $this->assertStringContainsString('parse is provided by the validator module', $err);
+            [$code, $out, $err] = self::runCli(['wsystem-einvoice', 'validate', '--json', $xmlFile]);
+            $this->assertSame(0, $code, $err);
+            $r = json_decode($out, true);
+            $this->assertIsArray($r);
+            $this->assertTrue($r['valid']);
+            $this->assertContains($r['engine'], ['php-core', 'saxonc']);
+            if ($r['engine'] === 'php-core') {
+                $this->assertSame('pre-check', $r['conformance']);
+                $this->assertSame('core-subset', $r['checked']['EN16931']);
+            } else {
+                $this->assertSame('official', $r['conformance']);
+            }
+
+            [$code, $out, $err] = self::runCli(['wsystem-einvoice', 'validate', $xmlFile]);
+            $this->assertSame(0, $code, $err);
+            $this->assertStringContainsString('valid [' . $r['engine'] . ']', $out);
+            if ($r['engine'] === 'php-core') {
+                $this->assertStringContainsString('pre-check', $out);
+                $this->assertStringContainsString('not the official engine', $out);
+            } else {
+                $this->assertStringContainsString('official KoSIT/CEN schematron', $out);
+            }
+
+            [$code, $out, $err] = self::runCli(['wsystem-einvoice', 'parse', '--json', '-'], $xml);
+            $this->assertSame(0, $code, $err);
+            $parsed = json_decode($out, true);
+            $this->assertSame('ubl', $parsed['syntax']);
+            $this->assertSame('INV-2026-001', $parsed['invoice']['invoice_number'] ?? $parsed['invoice']['number'] ?? null);
+        } finally {
+            @unlink($xmlFile);
+        }
+    }
+
+    public function testValidateRejectsUnreadableInput(): void
+    {
+        [$code, $out, $err] = self::runCli(['wsystem-einvoice', 'validate', '-'], 'not an invoice');
+        $this->assertSame(1, $code);
+        $this->assertSame('', $out);
+        $this->assertStringStartsWith('input error:', $err);
+        $this->assertStringNotContainsString('Stack trace', $err);
+    }
+
+    public function testValidateReportsAnInvalidInvoice(): void
+    {
+        $path = __DIR__ . '/fixtures/validator/shared/invalid/ubl-xrechnung-BR-DE-15-no-buyer-reference.xml';
+        [$code, $out, $err] = self::runCli(['wsystem-einvoice', 'validate', $path]);
+        $this->assertSame(1, $code, $out . $err);
+        $this->assertMatchesRegularExpression('/^invalid \[(php-core|saxonc)\]/', $out);
+        $this->assertStringContainsString('BR-DE-15', $out);
     }
 
     public function testBinVersion(): void

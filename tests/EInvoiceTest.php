@@ -25,9 +25,14 @@ final class EInvoiceTest extends TestCase
         $this->assertSame($a['xml'], $b['xml']);
         $this->assertSame('955.00', $a['totals']['line_total']);
         $this->assertSame('UBL 2.1', $a['syntax']);
-        if (!class_exists(\WSystem\EInvoice\Validator\Validator::class)) {
-            $this->assertNull($a['valid']);
-            $this->assertSame('none', $a['validator']);
+        $this->assertTrue($a['valid']);
+        $this->assertContains($a['engine'], ['php-core', 'saxonc']);
+        $this->assertSame($a['engine'], $a['validator']);
+        if ($a['engine'] === 'php-core') {
+            $this->assertSame('pre-check', $a['conformance']);
+            $this->assertSame('core-subset', $a['checked']['EN16931']);
+        } else {
+            $this->assertSame('official', $a['conformance']);
         }
     }
 
@@ -54,13 +59,19 @@ final class EInvoiceTest extends TestCase
         $this->assertSame('BR-01', $r['errors'][0]['rule_id']);
     }
 
-    public function testValidateWithoutAModuleThrowsAClearError(): void
+    public function testValidateUsesTheDefaultEngine(): void
     {
-        if (class_exists(\WSystem\EInvoice\Validator\Validator::class)) {
-            $this->markTestSkipped('validator module is present');
+        $xml = Builder::xml(self::sample());
+        $r = (new EInvoice())->validate($xml);
+        $this->assertTrue($r['valid']);
+        $this->assertContains($r['engine'], ['php-core', 'saxonc']);
+        if ($r['engine'] === 'php-core') {
+            $this->assertSame('pre-check', $r['conformance']);
+            $this->assertSame('core-subset', $r['checked']['EN16931']);
+            $this->assertStringContainsString('pre-check', $r['rule_set']);
+            $this->assertStringContainsString('a pre-check, not a conformance check', $r['disclaimer']);
+        } else {
+            $this->assertSame('official', $r['conformance']);
         }
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('no validator configured');
-        (new EInvoice())->validate('<Invoice/>');
     }
 }

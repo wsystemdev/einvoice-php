@@ -37,6 +37,8 @@ file_put_contents('invoice.xml', $r['xml']);
 
 For `zugferd`, `factur-x` and `zugferd-xrechnung`, `$r['pdf']` holds a PDF/A-3b file with the CII XML embedded (`factur-x.xml` / `xrechnung.xml`). Credit notes (`type_code` `381`, plus a preceding invoice) and allowances or charges on the lines or the document are included in both the XML and the visual PDF.
 
+`$r['engine']` is `php-core` (default), `saxonc`, or `remote`. `$r['conformance']` is `pre-check` or `official`.
+
 ## Command line
 
 ```bash
@@ -44,19 +46,26 @@ vendor/bin/wsystem-einvoice --version
 vendor/bin/wsystem-einvoice create examples/invoice.json invoice.xml
 vendor/bin/wsystem-einvoice create --format zugferd examples/invoice.json invoice.pdf
 vendor/bin/wsystem-einvoice validate invoice.xml
+vendor/bin/wsystem-einvoice parse invoice.xml
 ```
 
-`validate` (and `parse`) are provided by the validator module in this package. They are not in the current pre-release build; `create` works now. Once the module is merged, `validate` runs XML Schema and a pure-PHP pre-check of the core rules by default (see below).
+On the default install, `validate` prints a line like:
+
+```text
+valid [php-core] EN 16931 + XRechnung 3.0.2: pre-check by the W System pure-PHP engine over the bundled KoSIT/CEN rule files (...), not the official engine
+```
+
+With the SaxonC-HE extension loaded, that becomes `valid [saxonc] … official KoSIT/CEN schematron …`. `--json` prints the same fields as the PHP API (`engine`, `conformance`, `checked`, `errors`).
 
 ## Which rules run where
 
-| Mode | XML Schema | EN 16931 rules | XRechnung 3.0.2 rules |
-|---|---|---|---|
-| Default (pure PHP) | yes | core subset (pre-check) | core subset (pre-check) |
-| With the optional SaxonC extension | yes | complete official CEN rule set | complete official KoSIT rule set |
-| With the W System validator (self-hosted) or the W System API | yes | complete | complete |
+| Engine | How it's enabled | XML Schema | EN 16931 / XRechnung 3.0.2 business rules | Labels in every result |
+|---|---|---|---|---|
+| `php-core` (default) | nothing to install | yes | pre-check only: a pure-PHP engine runs the bundled official rule files; it is not the official engine | `engine: "php-core"`, `conformance: "pre-check"`, `checked.EN16931: "core-subset"` |
+| `saxonc` | optional SaxonC-HE PHP extension (`ext-saxonc`), auto-detected | yes | official KoSIT/CEN schematron (bundled, unmodified) | `engine: "saxonc"`, `conformance: "official"` |
+| `remote` | `HttpValidator` (opt-in; the file is sent to the W System validator or API) | yes | official | `engine: "remote"`, `conformance: "official"` |
 
-Out of the box, validation runs XML Schema validation and a pure-PHP pre-check of the core EN 16931 and XRechnung rules. For the complete official rule sets, install the optional SaxonC extension or point the validator at the W System validator or API. Peppol BIS 3 rules are not included.
+Out of the box, validation runs XML Schema validation and a pure-PHP pre-check (`php-core`) of the EN 16931 and XRechnung rules. A valid result in this mode is a pre-check, not a conformance check. For the complete official rule sets, install the optional SaxonC-HE extension (`ext-saxonc`) or point the validator at the W System validator or API (`remote`). Peppol BIS 3 rules are not included.
 
 Every file the generator produces is tested in CI with the official KoSIT validator, veraPDF (PDF/A-3b) and the Mustang ZUGFeRD validator.
 

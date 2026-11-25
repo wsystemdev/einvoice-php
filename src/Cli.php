@@ -7,8 +7,7 @@ namespace WSystem\EInvoice;
 use WSystem\EInvoice\Generator\Generator;
 
 /**
- * `vendor/bin/wsystem-einvoice`. create is always available; validate, parse and rules:update run
- * when the validator module has shipped the matching class.
+ * `vendor/bin/wsystem-einvoice`: create, validate, parse and rules:update.
  */
 final class Cli
 {
@@ -39,7 +38,7 @@ final class Cli
                 'create' => self::create(array_slice($argv, 1), $stdin, $stdout, $stderr),
                 'validate' => self::validate(array_slice($argv, 1), $stdin, $stdout, $stderr),
                 'parse' => self::parse(array_slice($argv, 1), $stdin, $stdout, $stderr),
-                'rules:update' => self::rulesUpdate($stderr),
+                'rules:update' => self::rulesUpdate($stdout, $stderr),
                 default => self::fail($stderr, 'unknown command: ' . $cmd . "\n" . self::usage(), self::EXIT_USAGE),
             };
         } catch (InputError $e) {
@@ -70,10 +69,10 @@ the invoice (UBL/CII XML, or a ZUGFeRD / Factur-X PDF/A-3) to output or stdout.
 errors) as JSON on stdout; for PDF formats give an output path, because the PDF
 is not placed inside the JSON.
 
-validate and parse are provided by the validator module. Out of the box,
-validate runs XML Schema and a pure-PHP pre-check of the core EN 16931 and
-XRechnung rules (not a conformance check). The complete official rule sets
-need the optional SaxonC extension or the W System validator or API.
+validate runs XML Schema and, by default, the php-core engine (conformance:
+pre-check) — a pre-check, not a conformance check. The complete official rule
+sets need the optional SaxonC-HE extension (engine saxonc, ext-saxonc) or the
+W System validator or API (engine remote).
 
 Exit codes: 0 ok, 1 input or validation error, 2 usage.
 
@@ -179,14 +178,17 @@ TXT;
         return self::EXIT_OK;
     }
 
-    /** @param resource $stderr */
-    private static function rulesUpdate($stderr): int
+    /**
+     * @param resource $stdout
+     * @param resource $stderr
+     */
+    private static function rulesUpdate($stdout, $stderr): int
     {
         $class = 'WSystem\\EInvoice\\Validator\\RuleUpdater';
         if (!class_exists($class) || !method_exists($class, 'update')) {
             return self::fail($stderr, "rules:update is provided by the validator module, which is not in this build yet.\n", self::EXIT_USAGE);
         }
-        return (int) $class::update();
+        return (int) $class::update(null, null, $stdout);
     }
 
     /**
@@ -282,12 +284,9 @@ TXT;
             fwrite($stdout, json_encode($r, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n");
         } else {
             $ok = !empty($r['valid']);
-            $backend = $r['backend'] ?? $r['engine'] ?? 'unknown';
-            $checked = $r['checked']['EN16931'] ?? null;
-            $label = $checked === 'core-subset' || ($r['conformance'] ?? '') === 'pre-check'
-                ? 'pre-check (core subset, not a conformance check)'
-                : (string) ($r['rule_set'] ?? $backend);
-            fwrite($stdout, ($ok ? 'valid' : 'invalid') . " [$backend] $label\n");
+            $engine = $r['engine'] ?? $r['backend'] ?? 'unknown';
+            $label = (string) ($r['rule_set'] ?? $r['conformance'] ?? $engine);
+            fwrite($stdout, ($ok ? 'valid' : 'invalid') . " [$engine] $label\n");
             if (!empty($r['errors'])) {
                 fwrite($stdout, self::summariseErrors($r) . "\n");
             }

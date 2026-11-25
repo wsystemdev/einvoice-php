@@ -41,7 +41,7 @@
         "phpunit/phpunit": "^10.5 || ^11.0"
     },
     "suggest": {
-        "ext-saxon": "SaxonC-HE PHP extension: runs the official EN 16931 / XRechnung schematron (XSLT 2.0) in-process, identical to KoSIT",
+        "ext-saxonc": "SaxonC-HE PHP extension (php -m: saxonc): runs the official EN 16931 / XRechnung schematron (XSLT 2.0) in-process",
         "wsystem/wsystem-php": "Hosted W System API client: VIES VAT checks, Peppol routing, sending"
     },
     "autoload": {
