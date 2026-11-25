@@ -70,7 +70,7 @@ jobs:
           echo "$SAXONC_SHA256  /tmp/saxonc.zip" | sha256sum -c
           sudo mkdir -p /opt/saxonica && sudo unzip -q /tmp/saxonc.zip -d /opt/saxonica && sudo chown -R "$USER" /opt/saxonica
           S=/opt/saxonica/SaxonCHE-linux-x86_64-13-1-1
-          (cd $S/src && mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$S/SaxonCHE >/dev/null && make -j4 >/dev/null && make install >/dev/null)
+          (cd $S/src && mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release >/dev/null && make -j4 >/dev/null && mkdir -p $S/SaxonCHE/lib && cp -P libsaxonc-he.so* $S/SaxonCHE/lib/)
           (cd $S/php/src && phpize >/dev/null && ./configure --with-saxonc=$S/SaxonCHE --with-saxonc-core=$S/SaxonCCoreHE >/dev/null && make -j4 >/dev/null)
           echo "LD_LIBRARY_PATH=$S/SaxonCCoreHE/lib:$S/SaxonCHE/lib" >> "$GITHUB_ENV"
           echo "SAXON_EXT=$S/php/src/modules/saxon.so" >> "$GITHUB_ENV"
