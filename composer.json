@@ -1,6 +1,6 @@
 {
     "name": "wsystem/einvoice",
-    "description": "Create and validate EU e-invoices locally in PHP: XRechnung 3.0 (UBL and CII), EN 16931 UBL/CII and ZUGFeRD / Factur-X PDF/A-3. Offline, no API key. Official KoSIT/CEN rules via SaxonC, a pure-PHP pre-check otherwise.",
+    "description": "Create EU e-invoices locally in PHP: XRechnung 3.0 (UBL and CII), EN 16931 UBL/CII and ZUGFeRD / Factur-X PDF/A-3. Offline, no API key. Default validation: XML Schema + a pure-PHP pre-check of core EN 16931 / XRechnung rules; the complete official rule sets need the optional SaxonC extension or the W System validator/API.",
     "type": "library",
     "license": "Apache-2.0",
     "keywords": ["xrechnung", "zugferd", "factur-x", "en16931", "e-invoice", "e-rechnung", "ubl", "cii", "kosit", "schematron", "peppol"],
