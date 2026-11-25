@@ -52,9 +52,11 @@ final class Generator
             $notes[] = 'Built to the Peppol BIS Billing 3.0 structure and checked against EN 16931 only; Peppol-specific rules are not run.';
         }
         $v = $validator?->validate($b['xml'], $b['xrechnung'] ? 'xrechnung' : 'en16931');
+        $engine = $v['engine'] ?? $v['backend'] ?? 'none';
         $r = ['valid' => $v['valid'] ?? null, 'format' => $b['format'], 'syntax' => $b['syntax'], 'totals' => $b['totals'], 'xml' => $b['xml'],
             'errors' => $v['errors'] ?? [], 'warnings' => $v['warnings'] ?? [], 'checked' => $v['checked'] ?? null,
-            'validator' => $v['backend'] ?? 'none', 'notes' => $notes, 'disclaimer' => Codes::DISCLAIMER];
+            'validator' => $engine, 'engine' => $engine, 'conformance' => $v['conformance'] ?? null,
+            'notes' => $notes, 'disclaimer' => $v['disclaimer'] ?? Codes::DISCLAIMER];
         if ($b['pdf'] !== null) {
             $r['embedded_file'] = $b['pdf']['file_name'];
             $r['zugferd_profile'] = $b['pdf']['level'] === 'EN 16931' ? 'EN 16931 (COMFORT)' : 'XRECHNUNG';

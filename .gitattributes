@@ -1,0 +1,5 @@
+# Keep tests (including the large generator and validator fixtures) and GitHub
+# workflows out of the Packagist/dist archive.
+/tests/** export-ignore
+/.github/** export-ignore
+/phpunit.xml.dist export-ignore
