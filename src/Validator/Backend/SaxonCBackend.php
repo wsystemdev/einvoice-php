@@ -58,7 +58,8 @@ final class SaxonCBackend implements SchematronBackend
         $exe = self::$compiled[$file];
         // Not transformToString(): in SaxonC 13.1 an XsltExecutable that threw from transformToString() crashes the
         // PHP process when it is freed. setInitialMatchSelection() + applyTemplatesReturningString() is equivalent
-        // (same SVRL; covered by the parity tests) and stays usable after a dynamic error.
+        // (same SVRL; covered by the parity tests) and stays usable after a dynamic error. SaxonC also prints its own stack
+        // trace for such errors on the process's stderr; that output can't be switched off from PHP in 13.1.
         $exe->setGlobalContextItem($node);
         $exe->setInitialMatchSelection($node);
         try {

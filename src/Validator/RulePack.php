@@ -29,7 +29,13 @@ final class RulePack
 
     public function __construct(private ?string $dir = null)
     {
-        $this->dir ??= dirname(__DIR__, 2) . '/resources/kosit/xrechnung-3.0.2-' . self::VERSION;
+        // WSYSTEM_EINVOICE_RULES: a pack installed by `rules:update` (opt-in); the bundled pack otherwise
+        $this->dir ??= (getenv('WSYSTEM_EINVOICE_RULES') ?: null) ?? dirname(__DIR__, 2) . '/resources/kosit/xrechnung-3.0.2-' . self::VERSION;
+    }
+
+    public function isBundled(): bool
+    {
+        return realpath($this->dir) === realpath(dirname(__DIR__, 2) . '/resources/kosit/xrechnung-3.0.2-' . self::VERSION);
     }
 
     public function dir(): string

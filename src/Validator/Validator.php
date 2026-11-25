@@ -69,8 +69,7 @@ final class Validator implements ValidatorInterface
             try {
                 array_push($issues, ...$this->backend->run($doc, $rs, $this->rules));
             } catch (RuleEvaluationError $e) {
-                $e->xsdErrors = $issues;
-                throw $e;
+                throw $e->withXsdErrors($issues);
             }
         }
         if ($doc->syntax === 'cii' && str_contains(strtolower($doc->customizationId), 'extended')) {
@@ -99,6 +98,9 @@ final class Validator implements ValidatorInterface
             }
         }
         $ruleVersions = RulePack::ruleVersions() + ($official ? [] : ['core_rules' => CoreRulesBackend::VERSION]);
+        if (!$this->rules->isBundled()) {
+            $ruleVersions = ['rule_pack_dir' => $this->rules->dir(), 'note' => 'rule files from a pack installed by rules:update, not the bundled pack'] + $ruleVersions;
+        }
         if ($sk['applies']) {
             $ruleVersions['SK_national'] = Slovakia::TRANSPOSITION;
         }

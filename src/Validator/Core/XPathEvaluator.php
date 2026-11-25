@@ -20,6 +20,8 @@ final class XPathEvaluator
     /** @var array<string, array{params: list<array{0: string, 1: ?string}>, vars: list<array{0: string, 1: array}>, body: array}> */
     public array $functions = [];
     public ?Node $current = null;
+    /** XSLT match-pattern semantics: a dynamic error while testing a node makes that node a non-match. */
+    public bool $patternMode = false;
 
     public function __construct(public readonly Tree $tree)
     {
@@ -64,9 +66,19 @@ final class XPathEvaluator
             case 'var':
                 return $this->variable($a[1], $c);
             case 'or':
-                return [$this->ebv($this->ev($a[1], $c)) || $this->ebv($this->ev($a[2], $c))];
             case 'and':
-                return [$this->ebv($this->ev($a[1], $c)) && $this->ebv($this->ev($a[2], $c))];
+                // XPath 2.0 §2.3.4: operands may be evaluated in any order and an error in one need not be raised
+                // when the other decides the result (Saxon reorders/short-circuits like this).
+                $decide = $a[0] === 'or';
+                try {
+                    $left = $this->ebv($this->ev($a[1], $c));
+                } catch (XPathError $e) {
+                    if ($this->ebv($this->ev($a[2], $c)) === $decide) {
+                        return [$decide];
+                    }
+                    throw $e;
+                }
+                return [$left === $decide ? $decide : $this->ebv($this->ev($a[2], $c))];
             case 'if':
                 return $this->ebv($this->ev($a[1], $c)) ? $this->ev($a[2], $c) : $this->ev($a[3], $c);
             case 'for':
@@ -75,7 +87,8 @@ final class XPathEvaluator
             case 'every':
                 return $this->flwor($a, $c, 0, $c->vars);
             case 'gcmp':
-                return [$this->generalCompare($a[1], $this->atomize($this->ev($a[2], $c)), $this->atomize($this->ev($a[3], $c)))];
+                [$l, $r] = $this->operands($a[2], $a[3], $c);
+                return $l === null ? [false] : [$this->generalCompare($a[1], $l, $r)];
             case 'vcmp':
                 $l = $this->atomize($this->ev($a[2], $c));
                 $r = $this->atomize($this->ev($a[3], $c));
@@ -98,13 +111,18 @@ final class XPathEvaluator
                 $to = $this->toInt($r[0]);
                 return $from > $to ? [] : range($from, $to);
             case 'arith':
-                return $this->arith($a[1], $this->ev($a[2], $c), $this->ev($a[3], $c));
+                [$l, $r] = $this->operands($a[2], $a[3], $c);
+                return $l === null ? [] : $this->arith($a[1], $l, $r);
             case 'neg':
                 $v = $this->atomize($this->ev($a[1], $c));
                 if (!$v) {
                     return [];
                 }
-                return $this->arith('-', [0], [$v[0]]);
+                $x = $v[0] instanceof Untyped ? $this->castDouble($v[0]) : $v[0];
+                if (is_float($x)) {
+                    return [-$x]; // keeps the sign of zero: -(0e0) is -0
+                }
+                return $this->arith('-', [0], [$x]);
             case 'union':
                 return $this->docOrder(array_merge($this->nodesOnly($this->ev($a[1], $c)), $this->nodesOnly($this->ev($a[2], $c))));
             case 'intersect':
@@ -118,8 +136,8 @@ final class XPathEvaluator
             case 'instance':
                 return [$this->instanceOf($this->ev($a[1], $c), $a[2], $a[3])];
             case 'castable':
+                $v = $this->atomize($this->ev($a[1], $c)); // errors in the operand itself propagate
                 try {
-                    $v = $this->atomize($this->ev($a[1], $c));
                     if (!$v) {
                         return [$a[3] === '?'];
                     }
@@ -242,6 +260,28 @@ final class XPathEvaluator
             $seq = $allNodes ? $this->docOrder($out) : $out;
         }
         return $seq;
+    }
+
+    /**
+     * Atomized operands of a comparison or arithmetic; [null, null] when one is empty (result: false / empty). Like
+     * Saxon, an empty operand decides the result even if evaluating the other one would raise an error.
+     * @return array{0: ?list<mixed>, 1: ?list<mixed>}
+     */
+    private function operands(array $x, array $y, Ctx $c): array
+    {
+        try {
+            $l = $this->atomize($this->ev($x, $c));
+        } catch (XPathError $e) {
+            if ($this->atomize($this->ev($y, $c)) === []) {
+                return [null, null];
+            }
+            throw $e;
+        }
+        if ($l === []) {
+            return [null, null];
+        }
+        $r = $this->atomize($this->ev($y, $c));
+        return $r === [] ? [null, null] : [$l, $r];
     }
 
     /** @param list<mixed> $nodes */
@@ -406,7 +446,15 @@ final class XPathEvaluator
         $out = [];
         $n = count($seq);
         foreach ($seq as $i => $item) {
-            $r = $this->ev($p, new Ctx($item, $i + 1, $n, $c->vars));
+            if ($this->patternMode) {
+                try {
+                    $r = $this->ev($p, new Ctx($item, $i + 1, $n, $c->vars));
+                } catch (XPathError) {
+                    continue;
+                }
+            } else {
+                $r = $this->ev($p, new Ctx($item, $i + 1, $n, $c->vars));
+            }
             if (count($r) === 1 && (is_int($r[0]) || is_float($r[0]) || $r[0] instanceof Dec)) {
                 $num = $r[0] instanceof Dec ? $r[0]->toFloat() : (float) $r[0];
                 if ($num == $i + 1) {
@@ -500,6 +548,16 @@ final class XPathEvaluator
         return $m . 'E' . (int) $e;
     }
 
+    /** xs:untypedAtomic to xs:double as arithmetic / function conversion does it: FORG0001 when not a number. */
+    private function castDouble(Untyped $u): float
+    {
+        $d = self::parseDouble($u->v);
+        if (is_nan($d) && trim($u->v, " \t\n\r") !== 'NaN') {
+            throw new XPathError('FORG0001', "cannot convert '{$u->v}' to xs:double");
+        }
+        return $d;
+    }
+
     private function toDouble(mixed $x): float
     {
         return match (true) {
@@ -559,8 +617,20 @@ final class XPathEvaluator
                     [$x, $y] = [$a->v, $b->v];
                 } elseif ($a instanceof Untyped) {
                     [$x, $y] = [$this->promoteUntyped($a, $b), $b];
+                    if (is_float($b)) {
+                        if (self::javaCompare($op, $x, $y)) {
+                            return true;
+                        }
+                        continue;
+                    }
                 } elseif ($b instanceof Untyped) {
                     [$x, $y] = [$a, $this->promoteUntyped($b, $a)];
+                    if (is_float($a)) {
+                        if (self::javaCompare($op, $x, $y)) {
+                            return true;
+                        }
+                        continue;
+                    }
                 } else {
                     [$x, $y] = [$a, $b];
                 }
@@ -570,6 +640,32 @@ final class XPathEvaluator
             }
         }
         return false;
+    }
+
+    /**
+     * Saxon compares an untypedAtomic (converted to xs:double) with an xs:double like Java's Double.compare: -0 < 0 and
+     * NaN sorts above everything, while = / != treat NaN as unequal (measured on SaxonC-HE 13.1, see CoreEngineTest).
+     */
+    private static function javaCompare(string $op, float $x, float $y): bool
+    {
+        if ($op === '=' || $op === '!=') {
+            $eq = !is_nan($x) && !is_nan($y) && self::javaCmp($x, $y) === 0;
+            return $op === '=' ? $eq : !$eq;
+        }
+        $c = self::javaCmp($x, $y);
+        return match ($op) { '<' => $c < 0, '<=' => $c <= 0, '>' => $c > 0, '>=' => $c >= 0 };
+    }
+
+    private static function javaCmp(float $x, float $y): int
+    {
+        if (is_nan($x) || is_nan($y)) {
+            return is_nan($x) <=> is_nan($y);
+        }
+        if ($x != $y) {
+            return $x <=> $y;
+        }
+        // equal magnitude: -0.0 sorts before 0.0
+        return (fdiv(1, $x) < 0 ? 0 : 1) <=> (fdiv(1, $y) < 0 ? 0 : 1);
     }
 
     private function promoteUntyped(Untyped $u, mixed $other): mixed
@@ -628,8 +724,8 @@ final class XPathEvaluator
         if (count($l) > 1 || count($r) > 1) {
             throw new XPathError('XPTY0004', 'arithmetic on a sequence');
         }
-        $a = $l[0] instanceof Untyped ? $this->toDouble($l[0]) : $l[0];
-        $b = $r[0] instanceof Untyped ? $this->toDouble($r[0]) : $r[0];
+        $a = $l[0] instanceof Untyped ? $this->castDouble($l[0]) : $l[0];
+        $b = $r[0] instanceof Untyped ? $this->castDouble($r[0]) : $r[0];
         if (!self::isNumeric($a) || !self::isNumeric($b)) {
             throw new XPathError('XPTY0004', 'arithmetic on a non-number');
         }
@@ -638,7 +734,7 @@ final class XPathEvaluator
             $y = $this->toDouble($b);
             return [match ($op) {
                 '+' => $x + $y, '-' => $x - $y, '*' => $x * $y,
-                'div' => $y == 0.0 ? ($x == 0.0 || is_nan($x) ? NAN : ($x > 0 === (1 / $y > 0) ? INF : -INF)) : $x / $y,
+                'div' => fdiv($x, $y),
                 'mod' => $y == 0.0 ? NAN : fmod($x, $y),
                 'idiv' => $y == 0.0 ? throw new XPathError('FOAR0001', 'idiv by zero') : (int) ($x / $y),
             }];
@@ -870,13 +966,21 @@ final class XPathEvaluator
             case 'matches':
                 return [(bool) preg_match($this->regex($S(1), isset($args[2]) ? $S(2) : ''), $S(0))];
             case 'replace':
-                return [(string) preg_replace($this->regex($S(1), isset($args[3]) ? $S(3) : ''), self::replacement($S(2)), $S(0))];
+                $re = $this->regex($S(1), isset($args[3]) ? $S(3) : '');
+                if (preg_match($re, '')) {
+                    throw new XPathError('FORX0003', 'pattern matches a zero-length string');
+                }
+                return [(string) preg_replace($re, self::replacement($S(2)), $S(0))];
             case 'tokenize':
                 $in = $S(0);
+                $re = $this->regex($S(1), isset($args[2]) ? $S(2) : '');
+                if (preg_match($re, '')) {
+                    throw new XPathError('FORX0003', 'pattern matches a zero-length string');
+                }
                 if ($in === '') {
                     return [];
                 }
-                return preg_split($this->regex($S(1), isset($args[2]) ? $S(2) : ''), $in) ?: [];
+                return preg_split($re, $in) ?: [];
             case 'string-to-codepoints':
                 $s = $S(0);
                 return $s === '' ? [] : array_map('mb_ord', mb_str_split($s, 1, 'UTF-8'));
@@ -939,10 +1043,10 @@ final class XPathEvaluator
                 }
                 $acc = array_shift($v);
                 if ($acc instanceof Untyped) {
-                    $acc = $this->toDouble($acc);
+                    $acc = $this->castDouble($acc);
                 }
                 foreach ($v as $x) {
-                    $acc = $this->arith('+', [$acc], [$x instanceof Untyped ? $this->toDouble($x) : $x])[0];
+                    $acc = $this->arith('+', [$acc], [$x instanceof Untyped ? $this->castDouble($x) : $x])[0];
                 }
                 return [$acc];
             case 'avg':
@@ -954,7 +1058,7 @@ final class XPathEvaluator
                 return $this->arith('div', $s, [count($v)]);
             case 'max':
             case 'min':
-                $v = array_map(fn ($x) => $x instanceof Untyped ? $this->toDouble($x) : $x, $this->atomize($A(0)));
+                $v = array_map(fn ($x) => $x instanceof Untyped ? $this->castDouble($x) : $x, $this->atomize($A(0)));
                 if (!$v) {
                     return [];
                 }
@@ -985,6 +1089,8 @@ final class XPathEvaluator
             case 'xs:double':
             case 'xs:boolean':
             case 'xs:date':
+            case 'xs:untypedAtomic':
+            case 'xs:float':
                 $v = $this->atomize($A(0));
                 if (!$v) {
                     return [];
@@ -1028,7 +1134,7 @@ final class XPathEvaluator
                 'abs' => abs($x),
                 'floor' => floor($x),
                 'ceiling' => ceil($x),
-                'round' => $prec === 0 ? floor($x + 0.5) : (Dec::fromFloat($x)?->round($prec)->toFloat() ?? $x),
+                'round' => $prec === 0 ? (floor($x + 0.5) == 0 && ($x < 0 || fdiv(1, $x) < 0) ? -0.0 : floor($x + 0.5)) : (Dec::fromFloat($x)?->round($prec)->toFloat() ?? $x),
                 'round-half-to-even' => (Dec::fromFloat($x)?->roundHalfEven($prec)->toFloat() ?? $x),
             };
         }
@@ -1051,8 +1157,8 @@ final class XPathEvaluator
     private function substring(string $s, mixed $start, mixed $len): string
     {
         $chars = mb_str_split($s, 1, 'UTF-8');
-        $st = $this->roundXp($this->toDouble($start instanceof Untyped ? $this->toDouble($start) : $start));
-        $ln = $len === null ? INF : $this->roundXp($this->toDouble($len instanceof Untyped ? $this->toDouble($len) : $len));
+        $st = $this->roundXp($this->toDouble($start instanceof Untyped ? $this->castDouble($start) : $start));
+        $ln = $len === null ? INF : $this->roundXp($this->toDouble($len instanceof Untyped ? $this->castDouble($len) : $len));
         $out = '';
         foreach ($chars as $i => $ch) {
             $p = $i + 1;

@@ -243,6 +243,7 @@ final class SchematronProgram
             }
             try {
                 $set = [];
+                $ev->patternMode = true;
                 foreach ($ev->evaluate($r['ast'], $tree->root) as $n) {
                     $set[$n->id] = true;
                 }
@@ -253,6 +254,8 @@ final class SchematronProgram
                 foreach ($r['asserts'] as $a) {
                     $failures[] = ['id' => $a['id'], 'error' => 'context: ' . $e->getMessage()];
                 }
+            } finally {
+                $ev->patternMode = false;
             }
         }
         $errors = [];
@@ -294,7 +297,7 @@ final class SchematronProgram
                         }
                         $byPattern[$r['pattern']][] = ['id' => $a['id'], 'flag' => $a['flag'], 'text' => $text, 'location' => self::location($node)];
                     } catch (XPathError $e) {
-                        throw $e;
+                        throw new XPathError($e->xpathCode, substr($e->getMessage(), strlen($e->xpathCode) + 2) . " (rule {$a['id']} at " . self::location($node) . ')');
                     } catch (XPathUnsupported | \ArithmeticError | \TypeError | \ValueError $e) {
                         $errors[] = ['id' => $a['id'], 'error' => $e->getMessage(), 'location' => self::location($node)];
                     }

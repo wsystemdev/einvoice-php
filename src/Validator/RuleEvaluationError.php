@@ -12,6 +12,14 @@ namespace WSystem\EInvoice\Validator;
  */
 final class RuleEvaluationError extends \WSystem\EInvoice\InputError
 {
+    public readonly string $detail;
+
+    /** Same error with the XML Schema findings attached (and named in the message). */
+    public function withXsdErrors(array $xsdErrors): self
+    {
+        return new self($this->detail, $this->engine, $this->ruleset, $xsdErrors, $this->getPrevious());
+    }
+
     /**
      * @param list<array<string, mixed>> $xsdErrors
      */
@@ -19,10 +27,12 @@ final class RuleEvaluationError extends \WSystem\EInvoice\InputError
         string $detail,
         public readonly string $engine,
         public readonly string $ruleset,
-        public array $xsdErrors = [],
+        public readonly array $xsdErrors = [],
         ?\Throwable $previous = null,
     ) {
+        $xsd = $xsdErrors ? ' XML Schema: ' . $xsdErrors[0]['message'] . (count($xsdErrors) > 1 ? ' (+' . (count($xsdErrors) - 1) . ' more)' : '') : '';
         parent::__construct("The {$ruleset} rules could not be evaluated on this document ({$engine}): {$detail}. "
-            . 'This usually means a value has the wrong type; fix the XML Schema errors first.', 0, $previous);
+            . 'This usually means a value has the wrong type; fix the XML Schema errors first.' . $xsd, 0, $previous);
+        $this->detail = $detail;
     }
 }
