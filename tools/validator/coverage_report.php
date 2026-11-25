@@ -47,7 +47,7 @@ $md = "# php-core rule coverage (generated)\n\n"
     . "| Not evaluable by php-core (listed below; reported per result in `rules_not_evaluated`) | " . count($unsupported) . " |\n"
     . "| Rules that fired at least once under SaxonC in the test runs (and so were compared as failures, not only passes) | " . count($fired) . " |\n"
     . "| Documents compared | {$docs} |\n"
-    . "| Identical results (same rule ids, severities, messages, locations, or both engines aborted on a type error) | {$stats['identical']} |\n"
+    . "| Identical results, counted per document and rule set (same rule ids, severities, messages, locations, or both engines aborted on a type error) | {$stats['identical']} |\n"
     . "| Documents with any difference | {$stats['differ']} |\n"
     . "| Rules involved in a difference | " . count($mism) . " |\n\n";
 if ($diffs) {

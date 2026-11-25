@@ -615,22 +615,20 @@ final class XPathEvaluator
             foreach ($r as $b) {
                 if ($a instanceof Untyped && $b instanceof Untyped) {
                     [$x, $y] = [$a->v, $b->v];
+                } elseif ($a instanceof Untyped && self::isNumeric($b)) {
+                    if ($this->untypedNumericCompare($op, $a, $b, false)) {
+                        return true;
+                    }
+                    continue;
+                } elseif ($b instanceof Untyped && self::isNumeric($a)) {
+                    if ($this->untypedNumericCompare($op, $b, $a, true)) {
+                        return true;
+                    }
+                    continue;
                 } elseif ($a instanceof Untyped) {
                     [$x, $y] = [$this->promoteUntyped($a, $b), $b];
-                    if (is_float($b)) {
-                        if (self::javaCompare($op, $x, $y)) {
-                            return true;
-                        }
-                        continue;
-                    }
                 } elseif ($b instanceof Untyped) {
                     [$x, $y] = [$a, $this->promoteUntyped($b, $a)];
-                    if (is_float($a)) {
-                        if (self::javaCompare($op, $x, $y)) {
-                            return true;
-                        }
-                        continue;
-                    }
                 } else {
                     [$x, $y] = [$a, $b];
                 }
@@ -640,6 +638,28 @@ final class XPathEvaluator
             }
         }
         return false;
+    }
+
+    /**
+     * untypedAtomic vs number in a general comparison, as SaxonC-HE 13.1 does it (measured, see xpath_cases.txt): both
+     * become xs:double and are compared like Java's Double.compare, so "-0.00" = 0 is false and "0" = -0e0 is false;
+     * integer-looking text compared with an integer or decimal is read as an integer first, so "-0" = 0 is true.
+     * (Residual Saxon quirk not modelled: "-0" against some decimal values, e.g. 0.0, is false in Saxon.)
+     */
+    private function untypedNumericCompare(string $op, Untyped $u, mixed $num, bool $swapped): bool
+    {
+        if (!is_float($num) && preg_match('/^[ \t\r\n]*[+-]?\d+[ \t\r\n]*$/D', $u->v)) {
+            // integer-looking text: read as an integer first, so "-0" becomes 0 (no negative zero)
+            $x = (float) (int) trim($u->v, " \t\r\n+");
+            if (abs($x) >= 9.2e18) {
+                $x = (float) trim($u->v, " \t\r\n");
+            }
+            $y = $this->toDouble($num);
+            return $swapped ? self::javaCompare($op, $y, $x) : self::javaCompare($op, $x, $y);
+        }
+        $x = $this->castDouble($u);
+        $y = $this->toDouble($num);
+        return $swapped ? self::javaCompare($op, $y, $x) : self::javaCompare($op, $x, $y);
     }
 
     /**

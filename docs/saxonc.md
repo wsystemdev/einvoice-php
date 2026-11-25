@@ -18,7 +18,7 @@ echo "66bdeba467fcfa0be1f78c7ae477524773a5e39821a159884a7fd1aab6301d16  SaxonCHE
 sudo unzip -q SaxonCHE-linux-x86_64-13-1-1.zip -d /opt/saxonica
 S=/opt/saxonica/SaxonCHE-linux-x86_64-13-1-1
 cd $S/src && mkdir -p build && cd build \
-  && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$S/SaxonCHE && make -j4 && sudo make install
+  && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j4 && sudo cp -P libsaxonc-he.so* $S/SaxonCHE/lib/
 cd $S/php/src && phpize && ./configure --with-saxonc=$S/SaxonCHE --with-saxonc-core=$S/SaxonCCoreHE && make -j4 && sudo make install
 ```
 
