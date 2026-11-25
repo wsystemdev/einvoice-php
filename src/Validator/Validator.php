@@ -17,17 +17,19 @@ use WSystem\EInvoice\Validator\National\Slovakia;
  * CII D16B and ZUGFeRD / Factur-X / XRechnung PDF/A-3 hybrids. Same result shape and rule ids as W System's
  * POST /einvoice/validate (port of vatcheck einvoice.validate).
  *
- * Business rules run through a backend:
- *  - SaxonCBackend (default when the saxon extension is loaded): the official KoSIT/CEN schematron, exact results;
- *  - CommandBackend: the same official XSLT through Saxon-HE for Java (or your own command);
- *  - CoreRulesBackend (default otherwise): a pure-PHP subset of the core rules, reported as checked.* = "core-subset".
- * HttpValidator (a separate ValidatorInterface) sends the file to a W System validator container or api.wsystem.dev.
+ * Business rules run through a backend, and every result names it ("engine"):
+ *  - SaxonCBackend, engine "saxonc" (default when the SaxonC-HE extension is loaded): the official KoSIT/CEN schematron,
+ *    conformance "official";
+ *  - CoreRulesBackend, engine "php-core" (default otherwise): a pure-PHP pre-check, conformance "pre-check",
+ *    checked.* = "core-subset".
+ * HttpValidator (a separate ValidatorInterface, engine "remote") sends the file to a W System validator or api.wsystem.dev.
  */
 final class Validator implements ValidatorInterface
 {
     public const DISCLAIMER = Codes::DISCLAIMER;
-    private const CORE_DISCLAIMER = ' Business rules were checked with the pure-PHP core subset (no official schematron engine available): '
-        . 'a valid result here is a pre-check, not EN 16931 conformance. Install the SaxonC-HE extension or use the W System validator for the official rules.';
+    private const CORE_DISCLAIMER = ' Business rules were pre-checked by the pure-PHP engine (php-core), not by the official schematron engine: '
+        . 'a valid result here is a pre-check, not a conformance check. For the complete official rule sets, install the SaxonC-HE extension '
+        . 'or use the W System validator or API.';
 
     private SchematronBackend $backend;
     private RulePack $rules;
@@ -59,9 +61,17 @@ final class Validator implements ValidatorInterface
         } elseif (!in_array($rules, ['auto', 'en16931'], true)) {
             throw new InputError('rules must be auto, en16931 or xrechnung (peppol is not available yet)');
         }
+        if ($this->backend instanceof CoreRulesBackend) {
+            $this->backend->takeNotEvaluated();
+        }
         $issues = XsdCheck::errors($doc, $this->rules);
         foreach ($sets as $rs) {
-            array_push($issues, ...$this->backend->run($doc, $rs, $this->rules));
+            try {
+                array_push($issues, ...$this->backend->run($doc, $rs, $this->rules));
+            } catch (RuleEvaluationError $e) {
+                $e->xsdErrors = $issues;
+                throw $e;
+            }
         }
         if ($doc->syntax === 'cii' && str_contains(strtolower($doc->customizationId), 'extended')) {
             $issues = array_map([Issues::class, 'extendedRelax'], $issues);
@@ -117,6 +127,9 @@ final class Validator implements ValidatorInterface
             'business_rule_error_count' => count($errors) - $fmt,
             'ms' => (int) ((microtime(true) - $t0) * 1000),
         ];
+        if ($this->backend instanceof CoreRulesBackend) {
+            $out['rules_not_evaluated'] = $this->backend->takeNotEvaluated();
+        }
         if ($sk['applies']) {
             $out['slovakia'] = $sk;
         }
@@ -132,6 +145,7 @@ final class Validator implements ValidatorInterface
         $names = implode(' + ', array_map(static fn ($s) => $s === 'XRechnung' ? 'XRechnung 3.0.2' : 'EN 16931', $sets));
         return $official
             ? "{$names}: official KoSIT/CEN schematron (KoSIT config " . RulePack::VERSION . ')'
-            : "{$names}: W System pure-PHP core subset (" . CoreRulesBackend::VERSION . '; see docs/validator-rules.md), not the full official rule set';
+            : "{$names}: pre-check by the W System pure-PHP engine over the bundled KoSIT/CEN rule files (" . CoreRulesBackend::VERSION
+                . '; coverage in docs/validator-rules.md), not the official engine';
     }
 }

@@ -7,6 +7,7 @@ namespace WSystem\EInvoice\Validator\Backend;
 use WSystem\EInvoice\Validator\Document;
 use WSystem\EInvoice\Validator\Issues;
 use WSystem\EInvoice\Validator\RulePack;
+use WSystem\EInvoice\Validator\RuleEvaluationError;
 
 /**
  * Official rules in-process: the KoSIT/CEN schematron XSLT 2.0 files run by the SaxonC-HE PHP extension (MPL-2.0,
@@ -54,7 +55,17 @@ final class SaxonCBackend implements SchematronBackend
             self::$compiled[$file] = $exe;
         }
         $node = $proc->parseXmlFromString($doc->dom->saveXML($doc->dom->documentElement));
-        $out = self::$compiled[$file]->transformToString($node);
+        $exe = self::$compiled[$file];
+        // Not transformToString(): in SaxonC 13.1 an XsltExecutable that threw from transformToString() crashes the
+        // PHP process when it is freed. setInitialMatchSelection() + applyTemplatesReturningString() is equivalent
+        // (same SVRL; covered by the parity tests) and stays usable after a dynamic error.
+        $exe->setGlobalContextItem($node);
+        $exe->setInitialMatchSelection($node);
+        try {
+            $out = $exe->applyTemplatesReturningString();
+        } catch (\Throwable $e) {
+            throw new RuleEvaluationError(trim($e->getMessage()), 'saxonc', $ruleset, [], $e);
+        }
         if (!is_string($out) || $out === '') {
             throw new \RuntimeException('SaxonC returned no SVRL report for ' . basename($file));
         }
