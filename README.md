@@ -20,6 +20,20 @@ $r = (new EInvoice())->create([
 file_put_contents('invoice.xml', $r['xml']);
 ```
 
+For `zugferd`, `factur-x` and `zugferd-xrechnung`, `$r['pdf']` holds a PDF/A-3b file with the CII XML embedded (`factur-x.xml` / `xrechnung.xml`).
+
+## Which rules run where
+
+| Mode | XML Schema | EN 16931 rules | XRechnung 3.0.2 rules |
+|---|---|---|---|
+| Default (pure PHP) | yes | core subset (pre-check) | core subset (pre-check) |
+| With the optional SaxonC extension | yes | complete official CEN rule set | complete official KoSIT rule set |
+| With the W System validator (self-hosted) or the W System API | yes | complete | complete |
+
+Out of the box, validation runs XML Schema validation and a pure-PHP pre-check of the core EN 16931 and XRechnung rules. For the complete official rule sets, install the optional SaxonC extension or point the validator at the W System validator or API. Peppol BIS 3 rules are not included.
+
+Every file the generator produces is tested in CI with the official KoSIT validator, veraPDF (PDF/A-3b) and the Mustang ZUGFeRD validator.
+
 The invoice array is the same JSON object as the W System API's `POST /einvoice/create`, and the output is byte-identical to it.
 
 Licence: Apache-2.0. Bundled rule files keep their own licences (CEN EN 16931 artefacts: EUPL-1.2); see THIRD-PARTY-NOTICES.md. A technically valid file is not tax or legal advice.

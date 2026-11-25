@@ -1,0 +1,280 @@
+{
+ "multi_rate_shipping": {
+  "format": "zugferd",
+  "invoice_number": "INV-2026-001",
+  "issue_date": "2026-10-18",
+  "due_date": "2026-11-17",
+  "delivery_date": "2026-10-18",
+  "currency": "EUR",
+  "buyer_reference": "04011000-12345-34",
+  "seller": {
+   "name": "Muster GmbH",
+   "vat_id": "DE123456789",
+   "street": "Hauptstr. 1",
+   "city": "Berlin",
+   "postal_code": "10115",
+   "country": "DE",
+   "email": "billing@muster.de",
+   "phone": "+49 30 1234",
+   "contact_name": "Anna Muster"
+  },
+  "buyer": {
+   "name": "Kunde AG",
+   "vat_id": "DE811193231",
+   "street": "Ring 2",
+   "city": "Muenchen",
+   "postal_code": "80331",
+   "country": "DE",
+   "email": "ap@kunde.de"
+  },
+  "lines": [
+   {
+    "description": "Consulting",
+    "quantity": 10,
+    "unit": "HUR",
+    "unit_price": 95.5,
+    "vat_rate": 19
+   },
+   {
+    "description": "Book",
+    "quantity": 2,
+    "unit_price": 12.99,
+    "vat_rate": 7
+   },
+   {
+    "description": "Versand",
+    "quantity": 1,
+    "unit_price": 4.9,
+    "vat_rate": 19
+   }
+  ],
+  "payment": {
+   "iban": "DE89370400440532013000",
+   "terms": "30 days net"
+  }
+ },
+ "discount_order": {
+  "format": "zugferd",
+  "invoice_number": "INV-2026-001",
+  "issue_date": "2026-10-18",
+  "due_date": "2026-11-17",
+  "delivery_date": "2026-10-18",
+  "currency": "EUR",
+  "buyer_reference": "04011000-12345-34",
+  "seller": {
+   "name": "Muster GmbH",
+   "vat_id": "DE123456789",
+   "street": "Hauptstr. 1",
+   "city": "Berlin",
+   "postal_code": "10115",
+   "country": "DE",
+   "email": "billing@muster.de",
+   "phone": "+49 30 1234",
+   "contact_name": "Anna Muster"
+  },
+  "buyer": {
+   "name": "Kunde AG",
+   "vat_id": "DE811193231",
+   "street": "Ring 2",
+   "city": "Muenchen",
+   "postal_code": "80331",
+   "country": "DE",
+   "email": "ap@kunde.de"
+  },
+  "lines": [
+   {
+    "description": "Shirt",
+    "quantity": 2,
+    "unit_price": 29.9,
+    "vat_rate": 19
+   }
+  ],
+  "payment": {
+   "iban": "DE89370400440532013000",
+   "terms": "30 days net"
+  },
+  "allowances": [
+   {
+    "amount": 5,
+    "reason": "Gutschein SOMMER",
+    "reason_code": "95",
+    "vat_category": "S",
+    "vat_rate": 19
+   }
+  ]
+ },
+ "small_business_p19": {
+  "format": "zugferd",
+  "invoice_number": "INV-2026-001",
+  "issue_date": "2026-10-18",
+  "due_date": "2026-11-17",
+  "delivery_date": "2026-10-18",
+  "currency": "EUR",
+  "buyer_reference": "04011000-12345-34",
+  "seller": {
+   "name": "Muster GmbH",
+   "street": "Hauptstr. 1",
+   "city": "Berlin",
+   "postal_code": "10115",
+   "country": "DE",
+   "email": "billing@muster.de",
+   "phone": "+49 30 1234",
+   "contact_name": "Anna Muster",
+   "tax_number": "201/113/40209",
+   "company_id": "HRB 12345"
+  },
+  "buyer": {
+   "name": "Kunde AG",
+   "street": "Ring 2",
+   "city": "Muenchen",
+   "postal_code": "80331",
+   "country": "DE",
+   "email": "ap@kunde.de"
+  },
+  "lines": [
+   {
+    "description": "Consulting",
+    "quantity": 10,
+    "unit": "HUR",
+    "unit_price": 95.5,
+    "vat_category": "E",
+    "vat_rate": 0
+   }
+  ],
+  "payment": {
+   "iban": "DE89370400440532013000",
+   "terms": "30 days net"
+  },
+  "vat_exemption_reason": {
+   "E": "Kein Ausweis von Umsatzsteuer, da Kleinunternehmer gemäß § 19 UStG"
+  }
+ },
+ "reverse_charge_eu_b2b": {
+  "format": "zugferd",
+  "invoice_number": "INV-2026-001",
+  "issue_date": "2026-10-18",
+  "due_date": "2026-11-17",
+  "delivery_date": "2026-10-18",
+  "currency": "EUR",
+  "buyer_reference": "04011000-12345-34",
+  "seller": {
+   "name": "Muster GmbH",
+   "vat_id": "DE123456789",
+   "street": "Hauptstr. 1",
+   "city": "Berlin",
+   "postal_code": "10115",
+   "country": "DE",
+   "email": "billing@muster.de",
+   "phone": "+49 30 1234",
+   "contact_name": "Anna Muster"
+  },
+  "buyer": {
+   "name": "Kunde AG",
+   "vat_id": "FR40303265045",
+   "street": "Ring 2",
+   "city": "Paris",
+   "postal_code": "75001",
+   "country": "FR",
+   "email": "ap@kunde.de"
+  },
+  "lines": [
+   {
+    "description": "Software",
+    "quantity": 1,
+    "unit_price": 500,
+    "vat_category": "K",
+    "vat_rate": 0
+   }
+  ],
+  "payment": {
+   "iban": "DE89370400440532013000",
+   "terms": "30 days net"
+  },
+  "delivery_country": "FR"
+ },
+ "partial_refund_credit_note": {
+  "format": "zugferd",
+  "invoice_number": "CN-2026-001",
+  "issue_date": "2026-10-25",
+  "delivery_date": "2026-10-18",
+  "currency": "EUR",
+  "buyer_reference": "04011000-12345-34",
+  "seller": {
+   "name": "Muster GmbH",
+   "vat_id": "DE123456789",
+   "street": "Hauptstr. 1",
+   "city": "Berlin",
+   "postal_code": "10115",
+   "country": "DE",
+   "email": "billing@muster.de",
+   "phone": "+49 30 1234",
+   "contact_name": "Anna Muster"
+  },
+  "buyer": {
+   "name": "Kunde AG",
+   "vat_id": "DE811193231",
+   "street": "Ring 2",
+   "city": "Muenchen",
+   "postal_code": "80331",
+   "country": "DE",
+   "email": "ap@kunde.de"
+  },
+  "lines": [
+   {
+    "description": "Book (returned)",
+    "quantity": 1,
+    "unit_price": 12.99,
+    "vat_rate": 7
+   }
+  ],
+  "payment": {
+   "iban": "DE89370400440532013000",
+   "terms": "30 days net"
+  },
+  "type_code": "381",
+  "preceding_invoice": "INV-2026-001",
+  "preceding_invoice_date": "2026-10-18"
+ },
+ "export_third_country": {
+  "format": "zugferd",
+  "invoice_number": "INV-2026-001",
+  "issue_date": "2026-10-18",
+  "due_date": "2026-11-17",
+  "delivery_date": "2026-10-18",
+  "currency": "EUR",
+  "buyer_reference": "04011000-12345-34",
+  "seller": {
+   "name": "Muster GmbH",
+   "vat_id": "DE123456789",
+   "street": "Hauptstr. 1",
+   "city": "Berlin",
+   "postal_code": "10115",
+   "country": "DE",
+   "email": "billing@muster.de",
+   "phone": "+49 30 1234",
+   "contact_name": "Anna Muster"
+  },
+  "buyer": {
+   "name": "Kunde AG",
+   "street": "Ring 2",
+   "city": "Austin",
+   "postal_code": "73301",
+   "country": "US",
+   "email": "ap@kunde.de"
+  },
+  "lines": [
+   {
+    "description": "Hardware",
+    "quantity": 1,
+    "unit_price": 250,
+    "vat_category": "G",
+    "vat_rate": 0
+   }
+  ],
+  "payment": {
+   "iban": "DE89370400440532013000",
+   "terms": "30 days net"
+  },
+  "delivery_country": "US"
+ }
+}

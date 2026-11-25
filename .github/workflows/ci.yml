@@ -17,3 +17,35 @@ jobs:
       - run: composer validate --strict
       - run: composer install --no-interaction --no-progress
       - run: vendor/bin/phpunit
+  official-validators:
+    # Every fixture the PHP generator produces is checked by independent official tools:
+    # KoSIT validator (XRechnung 3.0.2 config bundled in this repo), veraPDF (PDF/A-3b) and Mustang (ZUGFeRD/Factur-X).
+    # Verdicts must equal the W System engine's (tests/fixtures/expected.json).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: {php-version: '8.4', extensions: 'dom, libxml, mbstring, zlib', coverage: none}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '21'}
+      - run: composer install --no-interaction --no-progress
+      - name: Download pinned validators
+        run: |
+          mkdir -p /tmp/tools
+          curl -sfL -o /tmp/tools/kosit.jar https://github.com/itplr-kosit/validator/releases/download/v1.6.3/validator-1.6.3-standalone.jar
+          curl -sfL -o /tmp/tools/mustang.jar https://github.com/ZUGFeRD/mustangproject/releases/download/core-2.26.0/Mustang-CLI-2.26.0.jar
+          echo "799e64befca97d4080e03608c80b85dd5a5ecc5f4ae4f35d1116ec2855b9a7c9  /tmp/tools/kosit.jar" | sha256sum -c
+          echo "42d7868cb68264874a7b8cab4c3587b03b23ccc7cd72373da917f66758bb9736  /tmp/tools/mustang.jar" | sha256sum -c
+          docker pull -q verapdf/cli:v1.30.4
+      - run: php tools/ci/generate.php build/official
+      - name: KoSIT validator on every XRechnung file
+        run: tools/ci/kosit-check.sh build/official /tmp/tools/kosit.jar
+      - name: veraPDF PDF/A-3b on every PDF
+        run: |
+          n=$(ls build/official/*.pdf | wc -l)
+          docker run --rm -v "$PWD/build/official:/data" verapdf/cli:v1.30.4 --flavour 3b --format text /data > /tmp/vera.txt || true
+          pass=$(grep -c '^PASS ' /tmp/vera.txt || true)
+          echo "veraPDF: $pass / $n PASS"; grep -v '^PASS ' /tmp/vera.txt | head -20
+          test "$pass" -eq "$n"
+      - name: Mustang on every valid PDF
+        run: tools/ci/mustang-check.sh build/official /tmp/tools/mustang.jar

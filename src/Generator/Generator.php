@@ -64,6 +64,10 @@ final class Generator
                 $pdf = \WSystem\EInvoice\Pdf\HybridPdf::build($invoice, $b['model'], $b['xml'], $b['format'], $b['pdf']['file_name'], $b['pdf']['level']);
                 $safe = substr(preg_replace('/[^A-Za-z0-9._-]+/', '_', Py::str($invoice['invoice_number'])), 0, 80) ?: 'invoice';
                 $r['pdf'] = $pdf;
+                if (\WSystem\EInvoice\Pdf\PdfA3::$replaced) {
+                    $r['notes'][] = 'Some characters are outside the PDF fonts (Windows-1252) and were simplified or shown as "?" in the visual PDF only; the embedded XML keeps them unchanged.';
+                    $r['pdf_info_replaced_characters'] = true;
+                }
                 $r['pdf_filename'] = $safe . '.pdf';
                 $r['pdf_info'] = ['standard' => 'PDF/A-3b', 'hybrid' => $b['pdf']['level'] === 'EN 16931' ? 'ZUGFeRD 2.3 / Factur-X 1.07 EN 16931' : 'ZUGFeRD 2.3 XRECHNUNG',
                     'af_relationship' => 'Alternative', 'bytes' => strlen($pdf), 'sha256' => hash('sha256', $pdf)];

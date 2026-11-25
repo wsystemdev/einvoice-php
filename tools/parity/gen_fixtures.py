@@ -51,6 +51,14 @@ for fmt in ALL:
 for fmt in ("peppol-bis3", "en16931", "cii"):
     add(f"sk-{fmt}", fmt, SK); add(f"no-{fmt}", fmt, NO)
 
+# the engine's shop-order fixtures (vatcheck tests/fixtures/shop_orders_b253.json), every format
+SHOP = json.load(open(os.path.join(os.path.dirname(__file__), "..", "..", "tests", "fixtures", "shop_orders_b253.json")))
+for case, inv in SHOP.items():
+    if case.startswith("_") or not isinstance(inv, dict):
+        continue
+    for fmt in ALL:
+        add(f"shop-{case}-{fmt}", fmt, inv)
+
 # edge cases
 E = copy.deepcopy(SAMPLE)
 add("reverse-charge-xrechnung", "xrechnung", {**E, "buyer": {**E["buyer"], "country": "AT", "vat_id": "ATU12345678"}, "delivery_country": "AT",

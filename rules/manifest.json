@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "description": "Rule packs for wsystem/einvoice `rules:update`. Each pack is an official, unmodified upstream release, pinned by SHA-256. Clients must refuse any file whose checksum differs.",
+  "current": "xrechnung-3.0.2-2026-08-31",
+  "packs": {
+    "xrechnung-3.0.2-2026-08-31": {
+      "name": "KoSIT validator configuration XRechnung 3.0.2 (includes CEN EN 16931 artefacts, EUPL-1.2)",
+      "url": "https://github.com/itplr-kosit/validator-configuration-xrechnung/releases/download/v2026-08-31/xrechnung-3.0.2-validator-configuration-2026-08-31.zip",
+      "sha256": "2530cd107c414511c5d0462ec10f886910395abfca820db82e83d70bf01221a8",
+      "bytes": 499607,
+      "licences": ["Apache-2.0 (KoSIT)", "EUPL-1.2 (CEN EN 16931 artefacts)"],
+      "bundled_in": ">=0.9.0"
+    }
+  }
+}
