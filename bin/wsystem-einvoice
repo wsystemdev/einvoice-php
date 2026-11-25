@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+// CLI: wsystem-einvoice create <invoice.json> [out]   (validate / parse are added by the validator module)
+foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $a) {
+    if (is_file($a)) {
+        require $a;
+        break;
+    }
+}
+$cmd = $argv[1] ?? '';
+if ($cmd !== 'create' || !isset($argv[2])) {
+    fwrite(STDERR, "usage: wsystem-einvoice create <invoice.json> [output file]\n");
+    exit(2);
+}
+try {
+    $inv = json_decode(file_get_contents($argv[2] === '-' ? 'php://stdin' : $argv[2]), true, 512, JSON_THROW_ON_ERROR);
+    $r = \WSystem\EInvoice\Generator\Generator::create($inv);
+} catch (\WSystem\EInvoice\InputError $e) {
+    fwrite(STDERR, 'input error: ' . $e->getMessage() . "\n");
+    exit(1);
+}
+$out = $r['pdf'] ?? $r['xml'];
+if (isset($argv[3])) {
+    file_put_contents($argv[3], $out);
+} else {
+    fwrite(STDOUT, $out);
+}

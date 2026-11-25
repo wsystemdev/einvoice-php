@@ -1,0 +1,30 @@
+{
+    "name": "wsystem/einvoice",
+    "description": "Create and validate EU e-invoices locally in PHP: XRechnung 3.0 (UBL and CII), EN 16931 UBL/CII and ZUGFeRD / Factur-X PDF/A-3. Offline, no API key. Official KoSIT/CEN rules via SaxonC, a pure-PHP pre-check otherwise.",
+    "type": "library",
+    "license": "Apache-2.0",
+    "keywords": ["xrechnung", "zugferd", "factur-x", "en16931", "e-invoice", "e-rechnung", "ubl", "cii", "kosit", "schematron", "peppol"],
+    "homepage": "https://wsystem.dev",
+    "authors": [{"name": "W System", "email": "hello@wsystem.dev", "homepage": "https://wsystem.dev"}],
+    "support": {"email": "hello@wsystem.dev", "issues": "https://github.com/wsystemdev/einvoice-php/issues", "source": "https://github.com/wsystemdev/einvoice-php"},
+    "require": {
+        "php": ">=8.1",
+        "ext-dom": "*",
+        "ext-libxml": "*",
+        "ext-mbstring": "*",
+        "ext-zlib": "*",
+        "setasign/fpdf": "^1.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0"
+    },
+    "suggest": {
+        "ext-saxon": "SaxonC-HE PHP extension: runs the official EN 16931 / XRechnung schematron (XSLT 2.0) in-process, identical to KoSIT",
+        "wsystem/wsystem-php": "Hosted W System API client: VIES VAT checks, Peppol routing, sending"
+    },
+    "autoload": {"psr-4": {"WSystem\\EInvoice\\": "src/"}},
+    "autoload-dev": {"psr-4": {"WSystem\\EInvoice\\Tests\\": "tests/"}},
+    "bin": ["bin/wsystem-einvoice"],
+    "scripts": {"test": "phpunit"},
+    "config": {"sort-packages": true}
+}
