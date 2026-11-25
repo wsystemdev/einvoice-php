@@ -1,12 +1,27 @@
 # Changelog
 
-## Unreleased
+## 0.9.0-beta.1
 
-- CLI: `vendor/bin/wsystem-einvoice` supports `create`, `--version`, `--help`, `--format`, `--json`, and clear input-error messages (no stack traces). `validate`, `parse` and `rules:update` are wired and will run when the validator module is present.
-- Generator: `EInvoice`, `Builder` and `Generator::create()` auto-discover `Validator\Validator` when that class is autoloadable, so a generated PDF is only built when the XML is valid.
-- PDF: credit notes show the title, the preceding invoice and no due date; document and line allowances/charges appear on the visual invoice; a default charge reason is no longer printed twice.
-- Packagist description and README state that the default install is a core-subset pre-check; official EN 16931 / XRechnung rules need SaxonC or the W System validator/API.
-- Generator: UBL 2.1 (EN 16931, XRechnung 3.0, Peppol BIS 3 structure), UN/CEFACT CII D16B (EN 16931, XRechnung 3.0), byte-identical to the W System API (439 parity fixtures + 4,700 fuzzed invoices).
-- Generator: ZUGFeRD 2.3 / Factur-X 1.07 (EN 16931 and XRECHNUNG profiles) as PDF/A-3b, built on setasign/fpdf (MIT) with embedded fonts, XMP and sRGB output intent. Visual text uses Windows-1252; other characters are simplified in the visual PDF only, with a note in the result.
-- CI: every generated fixture checked with the KoSIT validator, veraPDF and Mustang.
-- Package skeleton: namespaces `Generator`, `Validator`, `Model`, `Pdf`; KoSIT XRechnung 3.0.2 rules (2026-08-31) bundled unmodified.
+First public beta of `wsystem/einvoice`.
+
+### Validator
+
+- Offline `validate()` for UBL, CII and ZUGFeRD / Factur-X / XRechnung PDF/A-3: XML Schema plus EN 16931 and XRechnung 3.0.2 business rules.
+- Default engine is `php-core` (`conformance: "pre-check"`, `checked.EN16931: "core-subset"`): a pure-PHP pre-check over the bundled official rule files, not the official engine.
+- Optional SaxonC-HE extension (`ext-saxonc`) is auto-detected and reported as `engine: "saxonc"`, `conformance: "official"`.
+- Optional `HttpValidator` (`engine: "remote"`) sends the file to the W System validator or API. Opt-in only; the invoice leaves the machine.
+- `Parser::parse()` for UBL, CII and hybrid PDFs. `wsystem-einvoice rules:update` checks the published manifest and verifies SHA-256 before unpacking a newer official pack.
+
+### Generator
+
+- UBL 2.1 (EN 16931, XRechnung 3.0, Peppol BIS 3 structure) and UN/CEFACT CII D16B, byte-identical to the W System API (439 parity fixtures plus fuzzed invoices).
+- ZUGFeRD 2.3 / Factur-X 1.07 (EN 16931 and XRECHNUNG profiles) as PDF/A-3b, built on setasign/fpdf (MIT). Credit notes and allowances/charges are in the XML and on the visual invoice.
+- `EInvoice`, `Builder` and `Generator::create()` auto-use the validator when present; a PDF is only built when the XML is valid. Results include `engine` and `conformance`.
+
+### CLI and packaging
+
+- `vendor/bin/wsystem-einvoice` supports `create`, `validate`, `parse`, `rules:update`, `--version`, `--help`, `--format` and `--json`. Validate output uses the same engine and conformance labels as the PHP API.
+- Composer `suggest` names `ext-saxonc`. `composer.lock` is committed. `tests/` (and the large fixtures), `.github/` and `phpunit.xml.dist` are `export-ignore`.
+- README and the Packagist description state that the default install is a php-core pre-check; official EN 16931 / XRechnung rules need SaxonC or the W System validator/API. Peppol BIS 3 rules are not included.
+
+CI checks generated files with the official KoSIT validator, veraPDF (PDF/A-3b) and Mustang.
