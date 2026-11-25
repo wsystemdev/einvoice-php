@@ -21,7 +21,7 @@ First public beta of `wsystem/einvoice`.
 ### CLI and packaging
 
 - `vendor/bin/wsystem-einvoice` supports `create`, `validate`, `parse`, `rules:update`, `--version`, `--help`, `--format` and `--json`. Validate output uses the same engine and conformance labels as the PHP API.
-- Composer `suggest` names `ext-saxonc`. `composer.lock` is committed. `tests/` (and the large fixtures), `.github/` and `phpunit.xml.dist` are `export-ignore`.
+- Composer `suggest` names `ext-saxonc`. `composer.lock` is committed and resolved for PHP 8.1 (PHPUnit 10.5) so the 8.1–8.4 CI matrix can install it. `tests/` (and the large fixtures), `.github/` and `phpunit.xml.dist` are `export-ignore`.
 - README and the Packagist description state that the default install is a php-core pre-check; official EN 16931 / XRechnung rules need SaxonC or the W System validator/API. Peppol BIS 3 rules are not included.
 
 CI checks generated files with the official KoSIT validator, veraPDF (PDF/A-3b) and Mustang.
