@@ -10,7 +10,7 @@ use WSystem\EInvoice\Support\Py;
 
 /**
  * Build an e-invoice from the same array shape as W System's POST /einvoice/create.
- * xml() returns UBL or CII; the PDF formats (zugferd, factur-x, zugferd-xrechnung) are built by Invoice::create().
+ * xml() returns UBL or CII; the PDF formats (zugferd, factur-x, zugferd-xrechnung) are built by Generator::create().
  */
 final class Generator
 {
@@ -39,6 +39,7 @@ final class Generator
      */
     public static function create(array $invoice, ?ValidatorInterface $validator = null): array
     {
+        $validator = \WSystem\EInvoice\Validators::resolve($validator);
         $b = self::xml($invoice);
         $notes = [];
         foreach (($invoice['lines'] ?? []) as $ln) {

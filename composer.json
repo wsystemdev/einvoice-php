@@ -3,10 +3,32 @@
     "description": "Create EU e-invoices locally in PHP: XRechnung 3.0 (UBL and CII), EN 16931 UBL/CII and ZUGFeRD / Factur-X PDF/A-3. Offline, no API key. Default validation: XML Schema + a pure-PHP pre-check of core EN 16931 / XRechnung rules; the complete official rule sets need the optional SaxonC extension or the W System validator/API.",
     "type": "library",
     "license": "Apache-2.0",
-    "keywords": ["xrechnung", "zugferd", "factur-x", "en16931", "e-invoice", "e-rechnung", "ubl", "cii", "kosit", "schematron", "peppol"],
+    "keywords": [
+        "xrechnung",
+        "zugferd",
+        "factur-x",
+        "en16931",
+        "e-invoice",
+        "e-rechnung",
+        "ubl",
+        "cii",
+        "kosit",
+        "schematron",
+        "peppol"
+    ],
     "homepage": "https://wsystem.dev",
-    "authors": [{"name": "W System", "email": "hello@wsystem.dev", "homepage": "https://wsystem.dev"}],
-    "support": {"email": "hello@wsystem.dev", "issues": "https://github.com/wsystemdev/einvoice-php/issues", "source": "https://github.com/wsystemdev/einvoice-php"},
+    "authors": [
+        {
+            "name": "W System",
+            "email": "hello@wsystem.dev",
+            "homepage": "https://wsystem.dev"
+        }
+    ],
+    "support": {
+        "email": "hello@wsystem.dev",
+        "issues": "https://github.com/wsystemdev/einvoice-php/issues",
+        "source": "https://github.com/wsystemdev/einvoice-php"
+    },
     "require": {
         "php": ">=8.1",
         "ext-dom": "*",
@@ -22,9 +44,28 @@
         "ext-saxon": "SaxonC-HE PHP extension: runs the official EN 16931 / XRechnung schematron (XSLT 2.0) in-process, identical to KoSIT",
         "wsystem/wsystem-php": "Hosted W System API client: VIES VAT checks, Peppol routing, sending"
     },
-    "autoload": {"psr-4": {"WSystem\\EInvoice\\": "src/"}},
-    "autoload-dev": {"psr-4": {"WSystem\\EInvoice\\Tests\\": "tests/"}},
-    "bin": ["bin/wsystem-einvoice"],
-    "scripts": {"test": "phpunit"},
-    "config": {"sort-packages": true}
+    "autoload": {
+        "psr-4": {
+            "WSystem\\EInvoice\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WSystem\\EInvoice\\Tests\\": "tests/"
+        }
+    },
+    "bin": [
+        "bin/wsystem-einvoice"
+    ],
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.9.x-dev"
+        }
+    }
 }

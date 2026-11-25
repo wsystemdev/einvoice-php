@@ -1,0 +1,40 @@
+{
+  "format": "xrechnung",
+  "invoice_number": "INV-2026-001",
+  "issue_date": "2026-10-18",
+  "due_date": "2026-11-17",
+  "buyer_reference": "04011000-12345-34",
+  "seller": {
+    "name": "Muster GmbH",
+    "vat_id": "DE123456789",
+    "street": "Hauptstr. 1",
+    "city": "Berlin",
+    "postal_code": "10115",
+    "country": "DE",
+    "email": "billing@muster.de",
+    "phone": "+49 30 1234",
+    "contact_name": "Anna Muster"
+  },
+  "buyer": {
+    "name": "Kunde AG",
+    "vat_id": "DE811193231",
+    "street": "Ring 2",
+    "city": "Muenchen",
+    "postal_code": "80331",
+    "country": "DE",
+    "email": "ap@kunde.de"
+  },
+  "lines": [
+    {
+      "description": "Consulting",
+      "quantity": 10,
+      "unit": "HUR",
+      "unit_price": "95.50",
+      "vat_rate": 19
+    }
+  ],
+  "payment": {
+    "iban": "DE89370400440532013000",
+    "terms": "30 days net"
+  }
+}

@@ -2,7 +2,22 @@
 
 Create and check XRechnung 3.0 (UBL and CII), EN 16931 UBL/CII and ZUGFeRD / Factur-X PDF/A-3 invoices inside your own PHP application. No API key, no network.
 
-> **Status: pre-release, under active development.** The API may change before v1.0.
+> **Status: pre-release, under active development.** The API may change before v1.0. Packagist registration is pending; until then install from the GitHub repository (see below).
+
+## Install
+
+PHP 8.1 or newer. Once the package is on Packagist:
+
+```bash
+composer require wsystem/einvoice
+```
+
+Until then:
+
+```bash
+composer config repositories.wsystem-einvoice vcs https://github.com/wsystemdev/einvoice-php
+composer require wsystem/einvoice:dev-main
+```
 
 ```php
 use WSystem\EInvoice\EInvoice;
@@ -20,7 +35,18 @@ $r = (new EInvoice())->create([
 file_put_contents('invoice.xml', $r['xml']);
 ```
 
-For `zugferd`, `factur-x` and `zugferd-xrechnung`, `$r['pdf']` holds a PDF/A-3b file with the CII XML embedded (`factur-x.xml` / `xrechnung.xml`).
+For `zugferd`, `factur-x` and `zugferd-xrechnung`, `$r['pdf']` holds a PDF/A-3b file with the CII XML embedded (`factur-x.xml` / `xrechnung.xml`). Credit notes (`type_code` `381`, plus a preceding invoice) and allowances or charges on the lines or the document are included in both the XML and the visual PDF.
+
+## Command line
+
+```bash
+vendor/bin/wsystem-einvoice --version
+vendor/bin/wsystem-einvoice create examples/invoice.json invoice.xml
+vendor/bin/wsystem-einvoice create --format zugferd examples/invoice.json invoice.pdf
+vendor/bin/wsystem-einvoice validate invoice.xml
+```
+
+`validate` (and `parse`) are provided by the validator module in this package. They are not in the current pre-release build; `create` works now. Once the module is merged, `validate` runs XML Schema and a pure-PHP pre-check of the core rules by default (see below).
 
 ## Which rules run where
 

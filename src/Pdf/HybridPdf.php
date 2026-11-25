@@ -316,7 +316,7 @@ final class HybridPdf
                 $dsc[] = ['Art.-Nr. / Item: ' . Py::str($ln['sid']), false, 7, false];
             }
             foreach ($ln['acs'] as $a) {
-                $lbl = Py::t($a['reason']) ? Py::str($a['reason']) : (self::AC_REASON[Py::str($a['reason_code'])] ?? Py::str($a['reason_code']));
+                $lbl = $this->acReason($a);
                 $dsc[] = [($a['charge'] ? '+' : '-') . ' ' . $lbl . ($a['percent'] !== null ? ' ' . $this->qty($a['percent']) . ' %' : '') . ': ' . $this->money($a['amount']), false, 7, false];
             }
             $rate = $ln['cat'] !== 'O' ? $this->qty($ln['rate']) . ' %' : '–';
@@ -338,13 +338,7 @@ final class HybridPdf
         // totals
         $tot = [['Summe Positionen / Line total', $this->money($m['line_total']), false]];
         foreach ($m['doc_acs'] as $a) {
-            $lbl = ($a['charge'] ? 'Zuschlag / Charge' : 'Nachlass / Allowance') . ': '
-                . (Py::t($a['reason']) ? Py::str($a['reason']) : (self::AC_REASON[Py::str($a['reason_code'])] ?? Py::str($a['reason_code'])));
-            if ($a['percent'] !== null) {
-                $lbl .= ' (' . $this->qty($a['percent']) . ' %)';
-            }
-            $lbl .= $a['cat'] !== 'O' ? ' [' . $this->qty($a['rate']) . ' %]' : '';
-            $tot[] = [$lbl, ($a['charge'] ? '' : '-') . $this->money($a['amount']), false];
+            $tot[] = [$this->docAcLabel($a), ($a['charge'] ? '' : '-') . $this->money($a['amount']), false];
         }
         if ($m['doc_acs']) {
             $tot[] = ['Nettobetrag / Net amount', $this->money($m['basis']), false];
@@ -407,6 +401,34 @@ final class HybridPdf
         $this->ensure($this->block(self::L, 0, self::W, [[$note, false, 7.2, true]], 'L', true));
         $this->block(self::L, $pdf->GetY(), self::W, [[$note, false, 7.2, true]]);
         return $pdf->Output('S');
+    }
+
+    /** Reason text for an allowance or charge; empty if only a blank code was given. */
+    private function acReason(array $a): string
+    {
+        if (Py::t($a['reason'] ?? null)) {
+            return Py::str($a['reason']);
+        }
+        $code = Py::str($a['reason_code'] ?? '');
+        return self::AC_REASON[$code] ?? $code;
+    }
+
+    /**
+     * Document-level row label. The money model fills a default reason of "Zuschlag / Charge" or
+     * "Rabatt / Discount" when neither reason nor reason_code is set; don't repeat the kind prefix then.
+     */
+    private function docAcLabel(array $a): string
+    {
+        $kind = $a['charge'] ? 'Zuschlag / Charge' : 'Nachlass / Allowance';
+        $reason = $this->acReason($a);
+        $lbl = ($reason !== '' && $reason !== $kind) ? "$kind: $reason" : $kind;
+        if ($a['percent'] !== null) {
+            $lbl .= ' (' . $this->qty($a['percent']) . ' %)';
+        }
+        if ($a['cat'] !== 'O') {
+            $lbl .= ' [' . $this->qty($a['rate']) . ' %]';
+        }
+        return $lbl;
     }
 
     private function decimals(Decimal $v): int

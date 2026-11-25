@@ -13,8 +13,8 @@ Repo: github.com/wsystemdev/einvoice-php · Composer package: `wsystem/einvoice`
 | `WSystem\EInvoice\InputError` | shared | Bad input (API's HTTP 400). Throw it for unreadable invoices too |
 | `resources/kosit/xrechnung-3.0.2-2026-08-31/` | shared | Official KoSIT release, **unmodified**. XSD: `resources/{ubl/2.1/xsd/maindoc/UBL-Invoice-2.1.xsd, ubl/2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd, cii/16b/xsd/CrossIndustryInvoice_100pD16B.xsd}`; XSLT: `resources/{ubl/2.1,cii/16b}/xsl/EN16931-*-validation.xsl`, `resources/xrechnung/3.0.2/xsl/XRechnung-{UBL,CII}-validation.xsl` (XSLT 2.0) |
 | `tests/` | all | PHPUnit 11, one `*Test.php` per class; namespace `WSystem\EInvoice\Tests\` |
-| `tests/fixtures/inputs.json` + `expected.json` | generator (read-only for others) | 391 invoice inputs; expected = the Python engine's XML, totals and **official validation verdict** (`valid`, `error_ids`, `warning_ids` from Saxon + KoSIT/CEN XSLT). The validator stream can assert its verdicts against `expected.json` |
-| `tests/fixtures/validator/` | validator | Validator-only fixtures (add yours here) |
+| `tests/fixtures/inputs.json` + `expected.json` | generator (read-only for others) | Generator inputs: JSON for POST /einvoice/create, plus the Python engine's XML, totals and a copy of official verdicts used for generator-side checks. **The validator stream must not use these for verdict assertions.** |
+| `tests/fixtures/validator/` | validator | Validator-only fixtures (add yours here). **Verdicts are asserted against the public corpus `wsystemdev/einvoice-validator` at `fixtures/expected.json` (QA TK2-03 / CEO 25 Nov), not against `einvoice-php` `tests/fixtures/expected.json`.** |
 | `tools/parity/` | generator | Python reference generation (`gen_fixtures.py`, `py_ref.py`, needs /workspace/vatcheck venv) and `compare.php` |
 | `.github/workflows/ci.yml` | generator (packaging) | Matrix PHP 8.1–8.4 phpunit. Add jobs, don't remove gates |
 
