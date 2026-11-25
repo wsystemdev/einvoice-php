@@ -49,3 +49,33 @@ jobs:
           test "$pass" -eq "$n"
       - name: Mustang on every valid PDF
         run: tools/ci/mustang-check.sh build/official /tmp/tools/mustang.jar
+  saxonc:
+    # Validator stream: the official KoSIT/CEN rules through the SaxonC-HE 13.1.1 PHP extension (built from Saxonica's
+    # pinned zip). WSYSTEM_REQUIRE_SAXONC=1 turns "extension missing" into a failure instead of a skip, so the SaxonC
+    # parity tests (identical results to the W System engine) and the php-core-vs-SaxonC checks really run.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: {php: ['8.1', '8.2', '8.3', '8.4']}
+    env:
+      SAXONC_ZIP: https://downloads.saxonica.com/SaxonC/HE/13/SaxonCHE-linux-x86_64-13-1-1.zip
+      SAXONC_SHA256: 66bdeba467fcfa0be1f78c7ae477524773a5e39821a159884a7fd1aab6301d16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: {php-version: '${{ matrix.php }}', extensions: 'dom, libxml, mbstring, zlib', coverage: none, tools: phpize}
+      - name: Build SaxonC-HE and its PHP extension
+        run: |
+          curl -sfL -o /tmp/saxonc.zip "$SAXONC_ZIP"
+          echo "$SAXONC_SHA256  /tmp/saxonc.zip" | sha256sum -c
+          sudo mkdir -p /opt/saxonica && sudo unzip -q /tmp/saxonc.zip -d /opt/saxonica && sudo chown -R "$USER" /opt/saxonica
+          S=/opt/saxonica/SaxonCHE-linux-x86_64-13-1-1
+          (cd $S/src && mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$S/SaxonCHE >/dev/null && make -j4 >/dev/null && make install >/dev/null)
+          (cd $S/php/src && phpize >/dev/null && ./configure --with-saxonc=$S/SaxonCHE --with-saxonc-core=$S/SaxonCCoreHE >/dev/null && make -j4 >/dev/null)
+          echo "LD_LIBRARY_PATH=$S/SaxonCCoreHE/lib:$S/SaxonCHE/lib" >> "$GITHUB_ENV"
+          echo "SAXON_EXT=$S/php/src/modules/saxon.so" >> "$GITHUB_ENV"
+      - run: composer install --no-interaction --no-progress
+      - run: php -d extension=$SAXON_EXT -r 'echo (new Saxon\SaxonProcessor(false))->version(), PHP_EOL;'
+      - run: WSYSTEM_REQUIRE_SAXONC=1 php -d extension=$SAXON_EXT -d memory_limit=2G vendor/bin/phpunit tests/Validator
+      - name: php-core vs SaxonC on the corpus plus seeded mutations
+        run: php -d extension=$SAXON_EXT -d memory_limit=3G tools/validator/differential.php --mutants=3 --seed=1 --out=/tmp/differential.json

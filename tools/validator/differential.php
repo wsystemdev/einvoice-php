@@ -182,3 +182,4 @@ echo json_encode($stats), "\n";
 foreach (array_slice($diffs, 0, 15) as $d) {
     echo "DIFF {$d['doc']}\n  - ", implode("\n  - ", $d['missing']), "\n  + ", implode("\n  + ", $d['extra']), "\n";
 }
+exit($stats['differ'] > 0 ? 1 : 0);
