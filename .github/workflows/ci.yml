@@ -1,6 +1,6 @@
 name: CI
 on:
-  push: {branches: [main, "fix/**", "release/**"]}
+  push:
   pull_request:
   workflow_dispatch:
 permissions: {contents: read}
