@@ -25505,6 +25505,121 @@
   "line_count": 0,
   "note": "Values are read as written in the XML (strings, no rounding or recomputation). Reading does not check validity: use POST /einvoice/validate for the EN 16931 / XRechnung rules. Not tax advice."
  },
+ "shared/invalid/XRECHNUNG_Einfach_fx.pdf": {
+  "syntax": "cii",
+  "document_type": "invoice",
+  "profile": "XRechnung",
+  "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+  "container": {
+   "container": "pdf",
+   "embedded_file": "xrechnung.xml"
+  },
+  "invoice": {
+   "invoice_number": "471102",
+   "issue_date": "2024-11-15",
+   "type_code": "380",
+   "currency": "EUR",
+   "due_date": "2025-12-15",
+   "buyer_reference": "04011000-12345-34",
+   "notes": [
+    "Rechnung gemäß Bestellung vom 01.11.2024.",
+    "Lieferant GmbH\t\t\t\t\nLieferantenstraße 20\t\t\t\t\n80333 München\t\t\t\t\nDeutschland\t\t\t\t\nGeschäftsführer: Hans Muster\nHandelsregisternummer: H A 123"
+   ],
+   "payment_terms": "#SKONTO#TAGE=10#PROZENT=3.00#",
+   "seller": {
+    "name": "Lieferant GmbH",
+    "vat_id": "DE123456789",
+    "tax_registration_id": "201/113/40209",
+    "electronic_address": "info@Mustermann.de",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "Lieferantenstraße 20",
+     "city": "München",
+     "postal_code": "80333",
+     "country": "DE"
+    },
+    "contact": {
+     "name": "Max Mustermann",
+     "phone": "+49891234567",
+     "email": "Max@Mustermann.de"
+    }
+   },
+   "buyer": {
+    "name": "Kunden AG Mitte",
+    "electronic_address": "info@kunde.de",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "Kundenstraße 15",
+     "city": "Frankfurt",
+     "postal_code": "69876",
+     "country": "DE"
+    }
+   },
+   "delivery": {
+    "date": "2024-11-14"
+   },
+   "totals": {
+    "line_total": "473.00",
+    "allowance_total": "0.00",
+    "charge_total": "0.00",
+    "total_without_vat": "473.00",
+    "vat_total": "56.87",
+    "total_with_vat": "529.87",
+    "prepaid": "0.00",
+    "amount_due": "529.87"
+   },
+   "vat_breakdown": [
+    {
+     "category": "S",
+     "rate": "7.00",
+     "taxable_amount": "275.00",
+     "tax_amount": "19.25"
+    },
+    {
+     "category": "S",
+     "rate": "19.00",
+     "taxable_amount": "198.00",
+     "tax_amount": "37.62"
+    }
+   ],
+   "payment": [
+    {
+     "means_code": "58",
+     "iban": "DE02120300000000202051",
+     "account_name": "Kunden AG",
+     "bic": "BYLADEM1001"
+    }
+   ],
+   "lines": [
+    {
+     "id": "1",
+     "name": "Trennblätter A4",
+     "quantity": "20.0000",
+     "unit": "H87",
+     "unit_price": "9.9000",
+     "net_amount": "198.00",
+     "vat_category": "S",
+     "vat_rate": "19.00",
+     "seller_item_id": "TB100A4",
+     "standard_item_id": "4012345001235"
+    },
+    {
+     "id": "2",
+     "name": "Joghurt Banane",
+     "quantity": "50.0000",
+     "unit": "H87",
+     "unit_price": "5.5000",
+     "net_amount": "275.00",
+     "vat_category": "S",
+     "vat_rate": "7.00",
+     "seller_item_id": "ARNR2",
+     "standard_item_id": "4000050986428"
+    }
+   ]
+  },
+  "line_count": 2,
+  "note": "Values are read as written in the XML (strings, no rounding or recomputation). Reading does not check validity: use POST /einvoice/validate for the EN 16931 / XRechnung rules. Not tax advice."
+ },
  "shared/invalid/cii-xrechnung-BR-CL-04-currency.xml": {
   "syntax": "cii",
   "document_type": "invoice",
@@ -26478,6 +26593,321 @@
   "line_count": 2,
   "note": "Values are read as written in the XML (strings, no rounding or recomputation). Reading does not check validity: use POST /einvoice/validate for the EN 16931 / XRechnung rules. Not tax advice."
  },
+ "shared/valid/KoSIT_02.01a-cvd_INVOICE_ubl.xml": {
+  "syntax": "ubl",
+  "document_type": "invoice",
+  "profile": "XRechnung",
+  "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
+  "container": {
+   "container": "xml"
+  },
+  "invoice": {
+   "invoice_number": "1234567",
+   "issue_date": "2018-04-13",
+   "type_code": "380",
+   "currency": "EUR",
+   "due_date": "2018-04-13",
+   "tax_point_date": "2018-04-13",
+   "buyer_reference": "90000000-03083-72",
+   "order_reference": "65002278",
+   "contract_reference": "0000000752",
+   "preceding_invoices": [
+    "PIR1234567890"
+   ],
+   "notes": [
+    "#AAC#Invoice Note Description",
+    "#AAC#Invoice Note Description 2"
+   ],
+   "payment_terms": "Beschreibung 1: Bitte überweisen Sie bis zum 13.04.2018 auf das unten aufgeführte Konto.",
+   "seller": {
+    "name": "[Seller name]",
+    "trading_name": "[Seller trading name]",
+    "vat_id": "ATU123456789",
+    "tax_registration_id": "123/456/789",
+    "legal_registration_id": "123456789",
+    "legal_registration_scheme": "0088",
+    "electronic_address": "rechnungsausgang@test.com",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "[Seller address line 1]",
+     "additional": "[Seller address line 2]",
+     "city": "[Seller city]",
+     "postal_code": "12345",
+     "subdivision": "Bayern",
+     "country": "DE"
+    },
+    "contact": {
+     "name": "Tim Tester",
+     "phone": "012 3456789",
+     "email": "tim.tester@test.com"
+    }
+   },
+   "buyer": {
+    "name": "[Buyer name]",
+    "trading_name": "[Buyer trading name]",
+    "vat_id": "DE12345ABC",
+    "legal_registration_id": "90000000-03083-72",
+    "legal_registration_scheme": "0204",
+    "electronic_address": "rechnungseingang@test.de",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "[Buyer address line 1]",
+     "additional": "[Buyer address line 2]",
+     "city": "[Buyer city]",
+     "postal_code": "98765",
+     "subdivision": "Bayern",
+     "country": "DE"
+    },
+    "contact": {
+     "name": "Tina Tester",
+     "phone": "0800 123456",
+     "email": "tester@test.de"
+    }
+   },
+   "delivery": {
+    "date": "2018-04-13",
+    "party_name": "[Deliver to party name]",
+    "country": "DE"
+   },
+   "totals": {
+    "line_total": "10781250",
+    "allowance_total": "20000",
+    "charge_total": "20000",
+    "total_without_vat": "10781250",
+    "vat_total": "2048437.50",
+    "total_with_vat": "12829687.50",
+    "prepaid": "0",
+    "amount_due": "12829687.50"
+   },
+   "vat_breakdown": [
+    {
+     "category": "S",
+     "rate": "19",
+     "taxable_amount": "10781250",
+     "tax_amount": "2048437.50"
+    },
+    {
+     "category": "E",
+     "rate": "0",
+     "taxable_amount": "0",
+     "tax_amount": "0",
+     "exemption_reason": "[VAT exemption reason text]",
+     "exemption_reason_code": "VATEX-EU-132-1A"
+    }
+   ],
+   "payment": [
+    {
+     "means_code": "58",
+     "remittance_information": "Deb. 12345 / Fact. 9876543",
+     "iban": "DE79000000001234567890",
+     "account_name": "[Payment account name]",
+     "bic": "[BIC]"
+    },
+    {
+     "means_code": "58",
+     "remittance_information": "Deb. 12345 / Fact. 9876543",
+     "iban": "DE16000000002345678901",
+     "account_name": "[Payment account name 2]",
+     "bic": "[BIC]"
+    }
+   ],
+   "lines": [
+    {
+     "id": "1",
+     "name": "Fahrzeug XY der Klasse Z",
+     "description": "Gruppe von Fahrzeug XY der Klasse Z",
+     "quantity": "30",
+     "unit": "XPP",
+     "unit_price": "158125",
+     "net_amount": "4743750",
+     "vat_category": "S",
+     "vat_rate": "19",
+     "seller_item_id": "1034",
+     "standard_item_id": "123456789",
+     "note": "Invoice Note Description Line Item"
+    },
+    {
+     "id": "2",
+     "name": "Fahrzeug AB der Klasse C",
+     "description": "Gruppe von Fahrzeugde AB der Klasse C",
+     "quantity": "42",
+     "unit": "XPP",
+     "unit_price": "143750",
+     "net_amount": "6037500",
+     "vat_category": "S",
+     "vat_rate": "19"
+    }
+   ],
+   "attachments": [
+    {
+     "id": "OK987654321",
+     "embedded": false
+    }
+   ]
+  },
+  "line_count": 2,
+  "note": "Values are read as written in the XML (strings, no rounding or recomputation). Reading does not check validity: use POST /einvoice/validate for the EN 16931 / XRechnung rules. Not tax advice."
+ },
+ "shared/valid/KoSIT_02.01a-cvd_INVOICE_uncefact.xml": {
+  "syntax": "cii",
+  "document_type": "invoice",
+  "profile": "XRechnung",
+  "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
+  "container": {
+   "container": "xml"
+  },
+  "invoice": {
+   "invoice_number": "1234567",
+   "issue_date": "2018-04-13",
+   "type_code": "380",
+   "currency": "EUR",
+   "due_date": "2018-04-13",
+   "tax_point_date": "2018-04-13",
+   "buyer_reference": "90000000-03083-72",
+   "order_reference": "65002278",
+   "contract_reference": "0000000752",
+   "preceding_invoices": [
+    "PIR1234567890"
+   ],
+   "notes": [
+    "Invoice Note Description",
+    "Invoice Note Description 2"
+   ],
+   "payment_terms": "Beschreibung 1: Bitte überweisen Sie bis zum 13.04.2018 auf das unten aufgeführte Konto.",
+   "seller": {
+    "name": "[Seller name]",
+    "trading_name": "[Seller trading name]",
+    "vat_id": "ATU123456789",
+    "tax_registration_id": "123/456/789",
+    "legal_registration_id": "123456789",
+    "legal_registration_scheme": "0088",
+    "electronic_address": "rechnungsausgang@test.com",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "[Seller address line 1]",
+     "additional": "[Seller address line 2]",
+     "city": "[Seller city]",
+     "postal_code": "12345",
+     "subdivision": "Bayern",
+     "country": "DE"
+    },
+    "contact": {
+     "name": "Tim Tester",
+     "phone": "012 3456789",
+     "email": "tim.tester@test.com"
+    }
+   },
+   "buyer": {
+    "name": "[Buyer name]",
+    "trading_name": "[Buyer trading name]",
+    "vat_id": "DE12345ABC",
+    "legal_registration_id": "90000000-03083-72",
+    "legal_registration_scheme": "0204",
+    "electronic_address": "rechnungseingang@test.de",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "[Buyer address line 1]",
+     "additional": "[Buyer address line 2]",
+     "city": "[Buyer city]",
+     "postal_code": "98765",
+     "subdivision": "Bayern",
+     "country": "DE"
+    },
+    "contact": {
+     "name": "Tina Tester",
+     "phone": "0800 123456",
+     "email": "tester@test.de"
+    }
+   },
+   "delivery": {
+    "date": "2018-04-13",
+    "party_name": "[Deliver to party name]",
+    "country": "DE"
+   },
+   "totals": {
+    "line_total": "10781250",
+    "allowance_total": "20000",
+    "charge_total": "20000",
+    "total_without_vat": "10781250",
+    "vat_total": "2048437.50",
+    "total_with_vat": "12829687.50",
+    "prepaid": "0",
+    "rounding": "0",
+    "amount_due": "12829687.50"
+   },
+   "vat_breakdown": [
+    {
+     "category": "S",
+     "rate": "19",
+     "taxable_amount": "10781250.00",
+     "tax_amount": "2048437.50"
+    },
+    {
+     "category": "E",
+     "rate": "0",
+     "taxable_amount": "0",
+     "tax_amount": "0",
+     "exemption_reason": "[VAT exemption reason text]",
+     "exemption_reason_code": "VATEX-EU-132-1A"
+    }
+   ],
+   "payment": [
+    {
+     "means_code": "58",
+     "remittance_information": "Deb. 12345 / Fact. 9876543",
+     "iban": "DE79000000001234567890",
+     "account_name": "[Payment account name]",
+     "bic": "[BIC]"
+    },
+    {
+     "means_code": "58",
+     "remittance_information": "Deb. 12345 / Fact. 9876543",
+     "iban": "DE16000000002345678901",
+     "account_name": "[Payment account name 2]",
+     "bic": "[BIC]"
+    }
+   ],
+   "lines": [
+    {
+     "id": "1",
+     "name": "Fahrzeug XY der Klasse Z",
+     "description": "Gruppe von Fahrzeugde XY der Klasse Z",
+     "quantity": "30.00000000000",
+     "unit": "XPP",
+     "unit_price": "158125.0000000",
+     "net_amount": "4743750",
+     "vat_category": "S",
+     "vat_rate": "19",
+     "seller_item_id": "1034",
+     "standard_item_id": "123456789",
+     "note": "Invoice Note Description Line Item"
+    },
+    {
+     "id": "2",
+     "name": "Fahrzeug AB der Klasse C",
+     "description": "Gruppe von Fahrzeugde AB der Klasse C",
+     "quantity": "42",
+     "unit": "XPP",
+     "unit_price": "143750",
+     "net_amount": "6037500",
+     "vat_category": "S",
+     "vat_rate": "19"
+    }
+   ],
+   "attachments": [
+    {
+     "id": "ANG987654321",
+     "embedded": false
+    },
+    {
+     "id": "OK987654321",
+     "embedded": false
+    }
+   ]
+  },
+  "line_count": 2,
+  "note": "Values are read as written in the XML (strings, no rounding or recomputation). Reading does not check validity: use POST /einvoice/validate for the EN 16931 / XRechnung rules. Not tax advice."
+ },
  "shared/valid/KoSIT_04.05a-INVOICE_uncefact.xml": {
   "syntax": "cii",
   "document_type": "invoice",
@@ -26566,115 +26996,188 @@
   "line_count": 1,
   "note": "Values are read as written in the XML (strings, no rounding or recomputation). Reading does not check validity: use POST /einvoice/validate for the EN 16931 / XRechnung rules. Not tax advice."
  },
- "shared/valid/XRECHNUNG_Einfach_fx.pdf": {
+ "shared/valid/cii-xrechnung-BR-CL-23-unit-code-warning.xml": {
   "syntax": "cii",
   "document_type": "invoice",
   "profile": "XRechnung",
   "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
   "container": {
-   "container": "pdf",
-   "embedded_file": "xrechnung.xml"
+   "container": "xml"
   },
   "invoice": {
-   "invoice_number": "471102",
-   "issue_date": "2024-11-15",
+   "invoice_number": "RE-2026-0001",
+   "issue_date": "2026-03-14",
    "type_code": "380",
    "currency": "EUR",
-   "due_date": "2025-12-15",
-   "buyer_reference": "04011000-12345-34",
-   "notes": [
-    "Rechnung gemäß Bestellung vom 01.11.2024.",
-    "Lieferant GmbH\t\t\t\t\nLieferantenstraße 20\t\t\t\t\n80333 München\t\t\t\t\nDeutschland\t\t\t\t\nGeschäftsführer: Hans Muster\nHandelsregisternummer: H A 123"
-   ],
-   "payment_terms": "#SKONTO#TAGE=10#PROZENT=3.00#",
+   "due_date": "2026-04-13",
+   "buyer_reference": "04011000-12345-03",
+   "payment_terms": "Zahlbar innerhalb von 30 Tagen ohne Abzug / Payable within 30 days.",
    "seller": {
-    "name": "Lieferant GmbH",
+    "name": "Beispiel Maschinenbau GmbH",
     "vat_id": "DE123456789",
-    "tax_registration_id": "201/113/40209",
-    "electronic_address": "info@Mustermann.de",
+    "electronic_address": "rechnung@beispiel-maschinenbau.example",
     "electronic_address_scheme": "EM",
     "address": {
-     "street": "Lieferantenstraße 20",
-     "city": "München",
-     "postal_code": "80333",
+     "street": "Musterstrasse 12",
+     "city": "Berlin",
+     "postal_code": "10115",
      "country": "DE"
     },
     "contact": {
-     "name": "Max Mustermann",
-     "phone": "+49891234567",
-     "email": "Max@Mustermann.de"
+     "name": "Erika Mustermann",
+     "phone": "+49 30 1234567",
+     "email": "rechnung@beispiel-maschinenbau.example"
     }
    },
    "buyer": {
-    "name": "Kunden AG Mitte",
-    "electronic_address": "info@kunde.de",
+    "name": "Stadtwerke Beispielstadt AöR",
+    "electronic_address": "einkauf@stadtwerke-beispielstadt.example",
     "electronic_address_scheme": "EM",
     "address": {
-     "street": "Kundenstraße 15",
-     "city": "Frankfurt",
-     "postal_code": "69876",
+     "street": "Rathausplatz 1",
+     "city": "Hamburg",
+     "postal_code": "20095",
      "country": "DE"
     }
    },
    "delivery": {
-    "date": "2024-11-14"
+    "date": "2026-03-10"
    },
    "totals": {
-    "line_total": "473.00",
-    "allowance_total": "0.00",
-    "charge_total": "0.00",
-    "total_without_vat": "473.00",
-    "vat_total": "56.87",
-    "total_with_vat": "529.87",
-    "prepaid": "0.00",
-    "amount_due": "529.87"
+    "line_total": "1070.50",
+    "total_without_vat": "1070.50",
+    "vat_total": "203.40",
+    "total_with_vat": "1273.90",
+    "amount_due": "1273.90"
    },
    "vat_breakdown": [
     {
      "category": "S",
-     "rate": "7.00",
-     "taxable_amount": "275.00",
-     "tax_amount": "19.25"
-    },
-    {
-     "category": "S",
-     "rate": "19.00",
-     "taxable_amount": "198.00",
-     "tax_amount": "37.62"
+     "rate": "19",
+     "taxable_amount": "1070.50",
+     "tax_amount": "203.40"
     }
    ],
    "payment": [
     {
      "means_code": "58",
-     "iban": "DE02120300000000202051",
-     "account_name": "Kunden AG",
-     "bic": "BYLADEM1001"
+     "iban": "DE89370400440532013000"
     }
    ],
    "lines": [
     {
      "id": "1",
-     "name": "Trennblätter A4",
-     "quantity": "20.0000",
-     "unit": "H87",
-     "unit_price": "9.9000",
-     "net_amount": "198.00",
+     "name": "Beratungsleistung",
+     "quantity": "10",
+     "unit": "ZZZ",
+     "unit_price": "95.00",
+     "net_amount": "950.00",
      "vat_category": "S",
-     "vat_rate": "19.00",
-     "seller_item_id": "TB100A4",
-     "standard_item_id": "4012345001235"
+     "vat_rate": "19"
     },
     {
      "id": "2",
-     "name": "Joghurt Banane",
-     "quantity": "50.0000",
-     "unit": "H87",
-     "unit_price": "5.5000",
-     "net_amount": "275.00",
+     "name": "Reisekosten pauschal",
+     "quantity": "1",
+     "unit": "C62",
+     "unit_price": "120.50",
+     "net_amount": "120.50",
      "vat_category": "S",
-     "vat_rate": "7.00",
-     "seller_item_id": "ARNR2",
-     "standard_item_id": "4000050986428"
+     "vat_rate": "19"
+    }
+   ]
+  },
+  "line_count": 2,
+  "note": "Values are read as written in the XML (strings, no rounding or recomputation). Reading does not check validity: use POST /einvoice/validate for the EN 16931 / XRechnung rules. Not tax advice."
+ },
+ "shared/valid/ubl-xrechnung-BR-CL-23-unit-code-warning.xml": {
+  "syntax": "ubl",
+  "document_type": "invoice",
+  "profile": "XRechnung",
+  "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+  "container": {
+   "container": "xml"
+  },
+  "invoice": {
+   "invoice_number": "RE-2026-0001",
+   "issue_date": "2026-03-14",
+   "type_code": "380",
+   "currency": "EUR",
+   "due_date": "2026-04-13",
+   "buyer_reference": "04011000-12345-03",
+   "payment_terms": "Zahlbar innerhalb von 30 Tagen ohne Abzug / Payable within 30 days.",
+   "seller": {
+    "name": "Beispiel Maschinenbau GmbH",
+    "vat_id": "DE123456789",
+    "electronic_address": "rechnung@beispiel-maschinenbau.example",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "Musterstrasse 12",
+     "city": "Berlin",
+     "postal_code": "10115",
+     "country": "DE"
+    },
+    "contact": {
+     "name": "Erika Mustermann",
+     "phone": "+49 30 1234567",
+     "email": "rechnung@beispiel-maschinenbau.example"
+    }
+   },
+   "buyer": {
+    "name": "Stadtwerke Beispielstadt AöR",
+    "electronic_address": "einkauf@stadtwerke-beispielstadt.example",
+    "electronic_address_scheme": "EM",
+    "address": {
+     "street": "Rathausplatz 1",
+     "city": "Hamburg",
+     "postal_code": "20095",
+     "country": "DE"
+    }
+   },
+   "delivery": {
+    "date": "2026-03-10"
+   },
+   "totals": {
+    "line_total": "1070.50",
+    "total_without_vat": "1070.50",
+    "vat_total": "203.40",
+    "total_with_vat": "1273.90",
+    "amount_due": "1273.90"
+   },
+   "vat_breakdown": [
+    {
+     "category": "S",
+     "rate": "19",
+     "taxable_amount": "1070.50",
+     "tax_amount": "203.40"
+    }
+   ],
+   "payment": [
+    {
+     "means_code": "58",
+     "iban": "DE89370400440532013000"
+    }
+   ],
+   "lines": [
+    {
+     "id": "1",
+     "name": "Beratungsleistung",
+     "quantity": "10",
+     "unit": "ZZZ",
+     "unit_price": "95.00",
+     "net_amount": "950.00",
+     "vat_category": "S",
+     "vat_rate": "19"
+    },
+    {
+     "id": "2",
+     "name": "Reisekosten pauschal",
+     "quantity": "1",
+     "unit": "C62",
+     "unit_price": "120.50",
+     "net_amount": "120.50",
+     "vat_category": "S",
+     "vat_rate": "19"
     }
    ]
   },

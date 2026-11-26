@@ -5270,16 +5270,7 @@
    "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
    "document_type": "ubl_inv",
    "embedded_file": null,
-   "errors": [
-    {
-     "business_terms": [],
-     "location": "/Q{urn:oasis:names:specification:ubl:schema:xsd:Invoice-2}Invoice[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}InvoiceLine[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}Item[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}CommodityClassification[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}ItemClassificationCode[1]",
-     "message": "Item classification identifier identification scheme identifier MUST be coded using one of the UNTDID 7143 list.",
-     "rule_id": "BR-CL-13",
-     "ruleset": "EN16931",
-     "severity": "error"
-    }
-   ],
+   "errors": [],
    "file": "kosit/technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
    "input_error": null,
    "national": [],
@@ -5289,8 +5280,17 @@
    "sha256": "9784274dade1ccca8e4a2bb19966d4da129de384f96ff4ccb0bef187ce5df7c6",
    "source": "KoSIT xrechnung-testsuite v2026-08-31 (Apache-2.0)",
    "syntax": "ubl",
-   "valid": false,
-   "warnings": []
+   "valid": true,
+   "warnings": [
+    {
+     "business_terms": [],
+     "location": "/Q{urn:oasis:names:specification:ubl:schema:xsd:Invoice-2}Invoice[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}InvoiceLine[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}Item[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}CommodityClassification[1]/Q{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}ItemClassificationCode[1]",
+     "message": "Item classification identifier identification scheme identifier MUST be coded using one of the UNTDID 7143 list.",
+     "rule_id": "BR-CL-13",
+     "ruleset": "EN16931",
+     "severity": "warning"
+    }
+   ]
   },
   "kosit/technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml": {
    "checked": {
@@ -5303,16 +5303,7 @@
    "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
    "document_type": "cii",
    "embedded_file": null,
-   "errors": [
-    {
-     "business_terms": [],
-     "location": "/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}CrossIndustryInvoice[1]/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}SupplyChainTradeTransaction[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}IncludedSupplyChainTradeLineItem[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}SpecifiedTradeProduct[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}DesignatedProductClassification[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}ClassCode[1]",
-     "message": "Item classification identifier identification scheme identifier MUST be coded using one of the UNTDID 7143 list.",
-     "rule_id": "BR-CL-13",
-     "ruleset": "EN16931",
-     "severity": "error"
-    }
-   ],
+   "errors": [],
    "file": "kosit/technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
    "input_error": null,
    "national": [],
@@ -5322,8 +5313,17 @@
    "sha256": "b38a68e28cef4d4d02b171a7fbd4b097503ae5d92ddc1fd41edb1d9db4a758d8",
    "source": "KoSIT xrechnung-testsuite v2026-08-31 (Apache-2.0)",
    "syntax": "cii",
-   "valid": false,
-   "warnings": []
+   "valid": true,
+   "warnings": [
+    {
+     "business_terms": [],
+     "location": "/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}CrossIndustryInvoice[1]/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}SupplyChainTradeTransaction[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}IncludedSupplyChainTradeLineItem[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}SpecifiedTradeProduct[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}DesignatedProductClassification[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}ClassCode[1]",
+     "message": "Item classification identifier identification scheme identifier MUST be coded using one of the UNTDID 7143 list.",
+     "rule_id": "BR-CL-13",
+     "ruleset": "EN16931",
+     "severity": "warning"
+    }
+   ]
   },
   "mustang/BASIC-WL_Einfach_fx.pdf": {
    "checked": {
@@ -5811,7 +5811,18 @@
    "customization_id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
    "document_type": "cii",
    "embedded_file": "xrechnung.xml",
-   "errors": [],
+   "errors": [
+    {
+     "business_terms": [
+      "BT-41"
+     ],
+     "location": "/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}CrossIndustryInvoice[1]/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}SupplyChainTradeTransaction[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}ApplicableHeaderTradeAgreement[1]",
+     "message": "Only one BT-41 element is allowed on an invoice.",
+     "rule_id": "CII-SR-465",
+     "ruleset": "EN16931",
+     "severity": "error"
+    }
+   ],
    "file": "mustang/XRECHNUNG_Einfach_fx.pdf",
    "input_error": null,
    "national": [],
@@ -5821,19 +5832,8 @@
    "sha256": "daeb678623b9fd099e177f52a9231028780fb68f4469a8784f8f31f674bf079e",
    "source": "Mustang project sample (Apache-2.0), via vatcheck tests/corpus",
    "syntax": "cii",
-   "valid": true,
-   "warnings": [
-    {
-     "business_terms": [
-      "BT-41"
-     ],
-     "location": "/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}CrossIndustryInvoice[1]/Q{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}SupplyChainTradeTransaction[1]/Q{urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100}ApplicableHeaderTradeAgreement[1]",
-     "message": "Only one BT-41 element is allowed on an invoice.",
-     "rule_id": "CII-SR-465",
-     "ruleset": "EN16931",
-     "severity": "warning"
-    }
-   ]
+   "valid": false,
+   "warnings": []
   },
   "national/no-cii.xml": {
    "checked": {
@@ -6700,7 +6700,7 @@
   }
  },
  "engine": "W System Python engine (vatcheck einvoice.validate)",
- "engine_commit": "8657f075185186433ff64e4b6671f39ce0c6c86b",
+ "engine_commit": "fe56e36b317046adbd8127db917edbca924beb86",
  "rules": {
   "sha256": "2530cd107c414511c5d0462ec10f886910395abfca820db82e83d70bf01221a8",
   "xrechnung_config": "2026-08-31"

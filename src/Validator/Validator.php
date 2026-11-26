@@ -75,8 +75,9 @@ final class Validator implements ValidatorInterface
         if ($doc->syntax === 'cii' && str_contains(strtolower($doc->customizationId), 'extended')) {
             $issues = array_map([Issues::class, 'extendedRelax'], $issues);
         }
-        if ($doc->profile === 'XRechnung Extension' && in_array('XRechnung', $sets, true)) {
-            $issues = array_map(static fn ($i) => Issues::xrechnungExtLevel($i, $doc->syntax), $issues);
+        $kl = in_array('XRechnung', $sets, true) ? Issues::kositLevels($doc->profile, $doc->syntax, $doc->documentType, $doc->customizationId) : null;
+        if ($kl !== null) {
+            $issues = array_map(static fn ($i) => Issues::kositLevel($i, $kl[1], $kl[0]), $issues);
         }
         [$skIssues, $sk] = Slovakia::check($doc);
         [$noIssues, $no] = Norway::check($doc);

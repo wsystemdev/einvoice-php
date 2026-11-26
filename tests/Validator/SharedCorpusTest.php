@@ -57,7 +57,7 @@ final class SharedCorpusTest extends TestCase
     public function testCorpusIsTheSharedOne(): void
     {
         $exp = json_decode((string) file_get_contents(self::DIR . '/expected.json'), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertCount(17, $exp['files']);
+        $this->assertCount(21, $exp['files']);
         $this->assertStringStartsWith('wsystemdev/einvoice-validator ', (string) file_get_contents(self::DIR . '/SOURCE'));
         foreach (array_keys($exp['files']) as $f) {
             $this->assertFileExists(self::DIR . '/' . $f);

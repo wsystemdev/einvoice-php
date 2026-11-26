@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WSystem\EInvoice\Validator;
 
+use WSystem\EInvoice\Model\Codes;
+
 /**
  * Turns schematron output into result entries and applies profile severity rules.
  * Port of vatcheck einvoice._svrl, _clean, FIX_HINTS, _cl_terms, _extended_relax, _xrechnung_ext_level.
@@ -58,6 +60,27 @@ final class Issues
         'ubl' => ['BR-CL-21' => 'information', 'BR-CL-23' => 'warning', 'BR-CL-24' => 'information', 'BR-CL-10' => 'information',
             'BR-CL-11' => 'information', 'BR-CL-25' => 'information', 'BR-CL-26' => 'information', 'BR-CO-16' => 'information',
             'UBL-CR-470' => 'information', 'UBL-CR-646' => 'information'],
+    ];
+
+    private const CII_STD_LEVELS = ['BR-CL-23' => 'warning', 'BR-CL-21' => 'warning',
+        'CII-SR-452' => 'error', 'CII-SR-453' => 'error', 'CII-SR-454' => 'error', 'CII-SR-465' => 'error', 'CII-SR-466' => 'error',
+        'CII-SR-475' => 'information', 'CII-SR-476' => 'information'];
+
+    /**
+     * Severity overrides of KoSIT's standard "EN16931 XRechnung" scenarios (scenarios.xml customLevel, config 3.0.2 / 2026-08-31),
+     * per document type. Same table as XRECHNUNG_STD_LEVELS in the W System engine (vatcheck/einvoice.py, 0.3.157.1).
+     */
+    public const XRECHNUNG_STD_LEVELS = [
+        'ubl_inv' => ['BR-CL-23' => 'warning', 'BR-CL-21' => 'warning', 'UBL-CR-646' => 'error'],
+        'ubl_cn' => ['BR-CL-23' => 'warning', 'BR-CL-21' => 'warning'],
+        'cii' => self::CII_STD_LEVELS,
+    ];
+
+    /** Severity overrides of KoSIT's "EN16931 XRechnung CVD" scenarios, per document type. */
+    public const XRECHNUNG_CVD_LEVELS = [
+        'ubl_inv' => ['BR-CL-13' => 'information', 'BR-CL-23' => 'warning', 'BR-CL-21' => 'warning', 'UBL-CR-646' => 'error'],
+        'ubl_cn' => ['BR-CL-13' => 'information', 'BR-CL-23' => 'warning', 'BR-CL-21' => 'warning', 'UBL-CR-646' => 'error'],
+        'cii' => ['BR-CL-13' => 'information'] + self::CII_STD_LEVELS,
     ];
 
     /**
@@ -160,10 +183,35 @@ final class Issues
         return $i;
     }
 
+    /**
+     * The KoSIT scenario that matches the exact CustomizationID: [scenario name, severity table], or null.
+     * @return array{0: string, 1: array<string, string>}|null
+     */
+    public static function kositLevels(string $profile, string $syntax, string $documentType, string $customizationId): ?array
+    {
+        $dt = $syntax === 'cii' ? 'cii' : $documentType;
+        if ($profile === 'XRechnung Extension') {
+            return ['Extension', self::XRECHNUNG_EXT_LEVELS[$syntax]];
+        }
+        if ($customizationId === Codes::XRECHNUNG_ID && isset(self::XRECHNUNG_STD_LEVELS[$dt])) {
+            return ['XRechnung', self::XRECHNUNG_STD_LEVELS[$dt]];
+        }
+        if ($customizationId === Codes::XRECHNUNG_CVD_ID && isset(self::XRECHNUNG_CVD_LEVELS[$dt])) {
+            return ['XRechnung CVD', self::XRECHNUNG_CVD_LEVELS[$dt]];
+        }
+        return null;
+    }
+
     /** KoSIT XRechnung Extension scenario severity for one EN16931/XRechnung schematron issue. */
     public static function xrechnungExtLevel(array $i, string $syntax): array
     {
-        $lvl = self::XRECHNUNG_EXT_LEVELS[$syntax][(string) ($i['rule_id'] ?? '')] ?? null;
+        return self::kositLevel($i, self::XRECHNUNG_EXT_LEVELS[$syntax], 'Extension');
+    }
+
+    /** Apply one KoSIT scenario severity (customLevel) to one EN16931/XRechnung schematron issue. */
+    public static function kositLevel(array $i, array $levels, string $scenario): array
+    {
+        $lvl = $levels[(string) ($i['rule_id'] ?? '')] ?? null;
         if ($lvl === null || !in_array($i['ruleset'] ?? null, ['EN16931', 'XRechnung'], true)) {
             return $i;
         }
@@ -172,9 +220,15 @@ final class Issues
             return $i;
         }
         $i['severity'] = $sev;
-        $i['profile_note'] = $sev === 'warning'
-            ? 'Allowed in XRechnung Extension (KoSIT Extension scenario level: ' . $lvl . '); an error for standard XRechnung / EN 16931.'
-            : 'An error in XRechnung Extension (KoSIT Extension scenario level: error).';
+        if ($scenario === 'Extension') {
+            $i['profile_note'] = $sev === 'warning'
+                ? 'Allowed in XRechnung Extension (KoSIT Extension scenario level: ' . $lvl . '); an error for standard XRechnung / EN 16931.'
+                : 'An error in XRechnung Extension (KoSIT Extension scenario level: error).';
+        } else {
+            $i['profile_note'] = $sev === 'warning'
+                ? "Reported as $lvl by the official KoSIT $scenario scenario (customLevel), not as an error; the file is not rejected for it."
+                : "An error in the official KoSIT $scenario scenario (customLevel: error).";
+        }
         return $i;
     }
 }

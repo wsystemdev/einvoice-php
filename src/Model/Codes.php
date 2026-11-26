@@ -13,6 +13,7 @@ final class Codes
     public const EN16931_ID = 'urn:cen.eu:en16931:2017';
     public const XRECHNUNG_ID = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0';
     public const XRECHNUNG_EXT_ID = self::XRECHNUNG_ID . '#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0';
+    public const XRECHNUNG_CVD_ID = self::XRECHNUNG_ID . '#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9';
     public const PEPPOL_ID = 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0';
     public const PEPPOL_PROFILE = 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0';
 
