@@ -1,17 +1,10 @@
 # Changelog
 
-## 0.9.0-beta.2 (security fix, not released yet)
+## 0.9.0-beta.2
 
 ### Security
 
-- **Decompression bomb in PDF reading** (`Parser::parse()`, `validate()`, `Validator`): `/FlateDecode` streams were
-  inflated with no output limit, so a 1 MB PDF could inflate to 1 GiB (about 2 GB of memory with `memory_limit=-1`, or a
-  PHP fatal "Allowed memory size exhausted" error otherwise). Streams are now inflated incrementally with a byte counter:
-  all decompressed streams of one PDF together may be at most 75,000,000 bytes (`AttachmentReader::MAX_INFLATED_BYTES`,
-  the same limit as the W System API), and past it an `InputError` "decompressed data exceeds the limit of 75 MB" is
-  thrown. The embedded XML must also fit the normal input limit (5 MB by default). Regression tests use a 1 GiB bomb and
-  several object streams that only pass the limit together.
-- Reading a PDF that really decompresses to the full 75 MB needs about 100 MB of PHP memory.
+- beta.1 could use excessive memory on crafted compressed PDF streams; beta.2 caps decompression at 75 MB per PDF. All beta.1 users should upgrade.
 
 ## 0.9.0-beta.1
 
