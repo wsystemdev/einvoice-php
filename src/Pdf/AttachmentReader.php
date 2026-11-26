@@ -12,7 +12,16 @@ use WSystem\EInvoice\InputError;
  */
 final class AttachmentReader
 {
+    /**
+     * Most decompressed bytes read from one PDF (all streams together): 75,000,000, the same limit as the W System API's
+     * PDF reader. Protects against decompression bombs (a 1 MB PDF can inflate to gigabytes).
+     */
+    public const MAX_INFLATED_BYTES = 75_000_000;
+    private const LIMIT_MESSAGE = 'could not read PDF: decompressed data exceeds the limit of 75 MB (possible decompression bomb)';
+
     private string $pdf;
+    /** decompressed bytes left for this PDF */
+    private int $budget = self::MAX_INFLATED_BYTES;
     /** @var array<int, int> object number => byte offset of "N G obj" */
     private array $offsets = [];
     /** @var array<int, string> objects found inside object streams */
@@ -168,16 +177,55 @@ final class AttachmentReader
             if ($f[1] !== 'FlateDecode') {
                 throw new InputError("could not read PDF: unsupported stream filter {$f[1]}");
             }
-            $out = @gzuncompress($data);
-            if ($out === false) {
-                $out = @gzinflate(substr($data, 2));
+            $out = self::inflate($data, ZLIB_ENCODING_DEFLATE, $this->budget);
+            if ($out === null && strlen($data) > 2) {
+                $out = self::inflate(substr($data, 2), ZLIB_ENCODING_RAW, $this->budget);
             }
-            if ($out === false) {
+            if ($out === null) {
                 throw new InputError('could not read PDF: corrupt compressed stream');
             }
+            $this->budget -= strlen($out);
             return $out;
         }
         return $data;
+    }
+
+    /**
+     * Incremental inflate with a byte counter: small input chunks (deflate expands at most ~1032:1, so 1 KiB in gives at
+     * most ~1 MiB out), stop as soon as the output passes $max. null when the data is corrupt.
+     *
+     * @throws InputError past $max bytes
+     */
+    private static function inflate(string $data, int $encoding, int $max): ?string
+    {
+        $ctx = @inflate_init($encoding);
+        if ($ctx === false) {
+            return null;
+        }
+        $out = '';
+        $len = strlen($data);
+        for ($pos = 0; $pos < $len; $pos += 1024) {
+            $chunk = @inflate_add($ctx, substr($data, $pos, 1024), ZLIB_SYNC_FLUSH);
+            if ($chunk === false) {
+                return null;
+            }
+            if (strlen($out) + strlen($chunk) > $max) {
+                throw new InputError(self::LIMIT_MESSAGE);
+            }
+            $out .= $chunk;
+            if (inflate_get_status($ctx) === ZLIB_STREAM_END) {
+                return $out;
+            }
+        }
+        $chunk = @inflate_add($ctx, '', ZLIB_FINISH);
+        if ($chunk === false) {
+            // truncated stream: keep what was decoded, like gzuncompress would not; treat as corrupt
+            return null;
+        }
+        if (strlen($out) + strlen($chunk) > $max) {
+            throw new InputError(self::LIMIT_MESSAGE);
+        }
+        return $out . $chunk;
     }
 
     private function unpackObjStm(string $dict, string $stream): void
@@ -187,7 +235,10 @@ final class AttachmentReader
         }
         try {
             $data = $this->decode($dict, $stream);
-        } catch (InputError) {
+        } catch (InputError $e) {
+            if ($e->getMessage() === self::LIMIT_MESSAGE) {
+                throw $e;
+            }
             return;
         }
         $first = (int) $fm[1];

@@ -80,6 +80,9 @@ final class Document
             sort($names, SORT_STRING);
             throw new InputError('PDF has embedded files but none is XML: [' . implode(', ', array_map(static fn ($n) => "'" . $n . "'", $names)) . ']');
         }
+        if (strlen($files[$pick]) > $maxBytes) {
+            throw new InputError('the embedded XML is too large (max ' . intdiv($maxBytes, 1024 * 1024) . ' MB)');
+        }
         return [$files[$pick], ['container' => 'pdf', 'embedded_file' => $pick]];
     }
 
